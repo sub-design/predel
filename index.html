@@ -84,6 +84,9 @@ input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border
   <div class="opts">КАРТА
     <div class="row" id="maps"><button data-m="0" class="on">БАСТИОН</button><button data-m="1">ЛИТЕЙНЯ</button></div>
   </div>
+  <div class="opts">БОТЫ
+    <div class="row" id="botn"><button data-b="0">БЕЗ БОТОВ</button><button data-b="2">2</button><button data-b="5" class="on">5</button></div>
+  </div>
   <button id="start">В БОЙ</button>
   <div class="opts" style="margin-top:30px">ИГРА ПО СЕТИ
     <div class="row"><input id="pname" maxlength="10" placeholder="ИМЯ" value="Игрок"><button id="host">СОЗДАТЬ ИГРУ</button></div>
@@ -793,11 +796,12 @@ function updateHUD(dt){
 function setCenterEmpty(){if(player.alive)$('center').innerHTML='';centerT=0;}
 
 /* ---------- game state ---------- */
+let botCount=5;
 let state='menu',time=0,matchTime=MATCH_TIME,menuAng=0,locked=false,noLock=false;
 function resetMatch(){for(const e of ents){e.frags=0;e.deaths=0;e.alive=false;if(e.isBot)e.mesh.group.visible=false;}
   for(const p of projs)scene.remove(p.mesh);projs.length=0;for(const p of PICKUPS){p.active=true;p.mesh.visible=true;}
   firstBlood=false;matchTime=MATCH_TIME;for(const e of ents)spawnEntity(e);}
-function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...bots];resetMatch();state='play';
+function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...bots.slice(0,botCount)];for(const b of bots.slice(botCount)){b.alive=false;b.mesh.group.visible=false;}resetMatch();state='play';
   for(const c of NET.conns){c.q=[];try{c.dc.send({t:'init',map:curMap,nid:c.ent.nid,roster:roster(),mt:matchTime});}catch(e){}}
   $('menu').classList.add('hidden');$('end').classList.add('hidden');$('hud').style.display='block';$('feed').innerHTML='';feedList.length=0;
   requestLock();announce('В БОЙ!');}
@@ -807,11 +811,12 @@ function showPause(invite){if(state!=='play')return;state='paused';mouseDown=fal
   $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';$('pausehint').textContent=invite?'СКОПИРУЙТЕ ПРИГЛАШЕНИЕ И ОТПРАВЬТЕ ДРУГУ · КЛИК ПО ЭКРАНУ — В БОЙ':'КЛИК — ПРОДОЛЖИТЬ';
   $('pause').classList.remove('hidden');if(locked&&document.exitPointerLock)document.exitPointerLock();}
 function resumeGame(){state='play';$('pause').classList.add('hidden');}
-function requestLock(){try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(()=>{noLock=true;});}catch(e){noLock=true;}}
+noLock=!canvas.requestPointerLock;
+function requestLock(){if(noLock||locked)return;try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;
   if(locked&&state==='paused')resumeGame();
-  else if(!locked&&state==='play'&&!noLock)showPause(false);});
-document.addEventListener('pointerlockerror',()=>{noLock=true;});
+  else if(!locked&&state==='play')showPause(false);});
+document.addEventListener('pointerlockerror',()=>{});
 $('pause').addEventListener('click',()=>{if(noLock||locked)resumeGame();else{requestLock();setTimeout(()=>{if(state==='paused'&&!locked)resumeGame();},400);}});
 $('start').addEventListener('click',()=>{netShutdown();startMatch();});
 $('host').addEventListener('click',()=>{initAudio();hostGame();});
@@ -831,17 +836,17 @@ addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;if
   if(e.code==='KeyM'){muted=!muted;pickMsg(muted?'ЗВУК ВЫКЛ':'ЗВУК ВКЛ');}});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseDown=false;});
-canvas.addEventListener('mousedown',e=>{if(e.button===0)mouseDown=true;if(state==='play'&&!locked&&!noLock)requestLock();});
+canvas.addEventListener('mousedown',e=>{if(e.button===0)mouseDown=true;if(state==='play'&&!locked)requestLock();});
 addEventListener('mouseup',e=>{if(e.button===0)mouseDown=false;});
 addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('wheel',e=>{if(state!=='play')return;const dir=e.deltaY>0?1:-1;for(let k=1;k<4;k++){const id=(player.weapon+dir*k+4)%4;if(switchWeapon(player,id))break;}},{passive:true});
-addEventListener('mousemove',e=>{if(!(e.buttons&1))mouseDown=false;if(state!=='play'||!player.alive||!(locked||noLock))return;const sens=.0022;
+addEventListener('mousemove',e=>{if(!(e.buttons&1))mouseDown=false;if(state!=='play'||!player.alive)return;const sens=.0022;
   player.yaw-=e.movementX*sens;player.pitch=clamp(player.pitch-e.movementY*sens,-1.5,1.5);swayX=clamp(swayX-e.movementX*.0002,-.03,.03);swayY=clamp(swayY+e.movementY*.0002,-.03,.03);});
 
 /* ---------- main loop ---------- */
 function update(dt){time+=dt;
   if(state==='play'||state==='paused'){matchTime-=dt;if(matchTime<=0){matchTime=0;endMatch();return;}if(state==='play')updatePlayer(dt);else if(player.alive)applyMove(player,new V3(),dt,false);}
-  for(const b of bots)updateBot(b,dt);
+  for(const b of bots)if(ents.includes(b))updateBot(b,dt);
   for(const e of ents){if(!e.alive){if(e.remote){e.deadT=(e.deadT||0)+dt;if(e.deadT>5)spawnEntity(e);}continue;}
     if(e.remote){e.cd-=dt;e.hurtT-=dt;if(e.health>100)e.health=Math.max(100,e.health-dt*1.5);lavaCheck(e,dt,true,false);continue;}
     e.cd-=dt;e.padCD-=dt;e.hurtT-=dt;if(e.health>100)e.health=Math.max(100,e.health-dt*1.5);
@@ -872,6 +877,8 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
 
 loadMap(0);
 for(const b of bots)spawnEntity(b);
+document.querySelectorAll('#botn button').forEach(b=>b.addEventListener('click',()=>{botCount=+b.dataset.b;LS.set('predel.bots',String(botCount));document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',x===b));}));
+{const sb=LS.get('predel.bots');if(sb!==''){botCount=+sb;document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',+x.dataset.b===botCount));}}
 $('copyinv').addEventListener('click',e=>{e.stopPropagation();copyInvite();});
 $('pname').value=LS.get('predel.name')||'Игрок';$('tuser').value=LS.get('predel.tu');$('tpass').value=LS.get('predel.tp');
 if(location.hash.length>1){const h=new URLSearchParams(location.hash.slice(1));
