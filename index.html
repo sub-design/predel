@@ -88,6 +88,7 @@ input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border
   <div class="opts" style="margin-top:30px">ИГРА ПО СЕТИ
     <div class="row"><input id="pname" maxlength="10" placeholder="ИМЯ" value="Игрок"><button id="host">СОЗДАТЬ ИГРУ</button></div>
     <div class="row"><input id="jcode" maxlength="4" placeholder="КОД"><button id="join">ПОДКЛЮЧИТЬСЯ</button></div>
+    <div class="row" id="turnrow" style="font-size:9px;color:#888;align-items:center">РЕТРАНСЛЯТОР METERED:<input id="tuser" placeholder="ЛОГИН" style="width:150px;font-size:9px;text-transform:none"><input id="tpass" type="password" placeholder="ПАРОЛЬ" style="width:120px;font-size:9px;text-transform:none"></div>
     <div id="netstatus"></div>
   </div>
   <div class="help">
@@ -97,7 +98,7 @@ input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border
     до 20 фрагов или 10 минут · ракета под ноги = прыжок на ракете
   </div>
 </div>
-<div id="pause" class="overlay hidden"><h1 style="font-size:40px">ПАУЗА</h1><div class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div></div>
+<div id="pause" class="overlay hidden"><h1 style="font-size:40px">ПАУЗА</h1><div class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div><button id="copyinv" class="hidden">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button></div>
 <div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div class="row" style="margin-top:28px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -453,8 +454,14 @@ let ents=[...bots];
 /* ---------- network ---------- */
 // Если сеть блокирует прямое соединение, сюда добавляется TURN-ретранслятор, например:
 // {urls:['turn:ХОСТ:3478','turns:ХОСТ:443?transport=tcp'],username:'...',credential:'...'}
-const TURN_SERVERS=[];
-const PEER_OPTS={config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478']},...TURN_SERVERS]}};
+// Логин/пароль TURN вводятся в меню (хранятся только в этом браузере) или приходят в ссылке-приглашении после '#'.
+const TURN_URLS=['turn:global.relay.metered.ca:80','turn:global.relay.metered.ca:80?transport=tcp','turn:global.relay.metered.ca:443','turns:global.relay.metered.ca:443?transport=tcp'];
+const LS={get(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+function turnCreds(){const u=$('tuser').value.trim(),p=$('tpass').value.trim();return u&&p?{u,p}:null;}
+function saveNetPrefs(){LS.set('predel.name',$('pname').value);LS.set('predel.tu',$('tuser').value.trim());LS.set('predel.tp',$('tpass').value.trim());}
+function peerOpts(){const ice=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478','stun:stun.relay.metered.ca:80']}];const t=turnCreds();if(t)ice.push({urls:TURN_URLS,username:t.u,credential:t.p});return{config:{iceServers:ice}};}
+function inviteLink(){const t=turnCreds();let h='join='+NET.code;if(t)h+='&tu='+encodeURIComponent(t.u)+'&tp='+encodeURIComponent(t.p);return location.origin+location.pathname+'#'+h;}
+async function copyInvite(){const l=inviteLink();try{await navigator.clipboard.writeText(l);pickMsg('ПРИГЛАШЕНИЕ СКОПИРОВАНО');$('copyinv').textContent='СКОПИРОВАНО ✓';}catch(e){prompt('Скопируйте ссылку-приглашение:',l);}setTimeout(()=>{$('copyinv').textContent='СКОПИРОВАТЬ ПРИГЛАШЕНИЕ';},2000);}
 const NET={mode:'off',peer:null,conns:[],dc:null,code:'',sendT:0,nidSeq:1,byNid:new Map(),myNid:0,projSeq:1};
 const HUMAN_COLORS=[0x40e0e0,0xff80c0,0xa0ff60,0xff9040,0xb0a0ff];
 function assignNid(e){e.nid=NET.nidSeq++;NET.byNid.set(e.nid,e);}
@@ -467,12 +474,12 @@ const r2=x=>Math.round(x*100)/100;const a3r=v=>[r2(v.x),r2(v.y),r2(v.z)];
 function roster(){return ents.map(e=>({n:e.nid,nm:e.name,c:e.color,b:!!e.isBot}));}
 function netStatus(t,err){const el=$('netstatus');el.textContent=t;el.className=err?'err':'';}
 function randCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=A[(Math.random()*A.length)|0];return c;}
-function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br>ИГРОКОВ: ${1+NET.conns.length}`;else if(isClient())t='СЕТЕВАЯ ИГРА';$('netinfo').innerHTML=t;$('pausenet').innerHTML=isHost()?`КОД ДЛЯ ДРУГА: ${NET.code} · ИГРА ПРОДОЛЖАЕТСЯ`:'';}
+function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br>ИГРОКОВ: ${1+NET.conns.length}`;else if(isClient())t='СЕТЕВАЯ ИГРА';$('netinfo').innerHTML=t;$('pausenet').innerHTML=isHost()?`КОД ДЛЯ ДРУГА: ${NET.code} · ИГРА ПРОДОЛЖАЕТСЯ${turnCreds()?'':'<br><span style="color:#f96">РЕТРАНСЛЯТОР НЕ ЗАДАН — ИЗ ДРУГОЙ СЕТИ МОЖЕТ НЕ ПОДКЛЮЧИТЬСЯ</span>'}`:'';$('copyinv').classList.toggle('hidden',!isHost());}
 function hostGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   NET.code=code||randCode();netStatus('СОЗДАЁМ ИГРУ…');
-  const peer=new Peer('predel-'+NET.code,PEER_OPTS);NET.peer=peer;
-  peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');pickMsg('КОД ИГРЫ: '+NET.code);});
+  saveNetPrefs();const peer=new Peer('predel-'+NET.code,peerOpts());NET.peer=peer;
+  peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');pickMsg('КОД ИГРЫ: '+NET.code+' · ESC → СКОПИРОВАТЬ ПРИГЛАШЕНИЕ');});
   peer.on('connection',dc=>{dc.on('open',()=>{const c={dc,q:[],ent:null};dc.on('data',d=>onHostData(c,d));dc.on('close',()=>dropConn(c));dc.on('error',()=>dropConn(c));});});
   peer.on('error',err=>{if(err.type==='unavailable-id'){peer.destroy();hostGame();}else{netStatus('ОШИБКА СЕТИ: '+err.type,true);}});}
 function onHostData(c,d){const e=c.ent;
@@ -496,7 +503,7 @@ function netTick(dt){NET.sendT-=dt;if(NET.sendT>0)return;NET.sendT=.05;for(const
 function joinGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   code=String(code||'').toUpperCase().trim();if(code.length!==4){netStatus('ВВЕДИТЕ КОД ИЗ 4 БУКВ',true);return;}
-  initAudio();netStatus('ПОДКЛЮЧЕНИЕ…');const peer=new Peer(PEER_OPTS);NET.peer=peer;
+  initAudio();netStatus('ПОДКЛЮЧЕНИЕ…');saveNetPrefs();const peer=new Peer(peerOpts());NET.peer=peer;
   peer.on('open',()=>{const dc=peer.connect('predel-'+code,{reliable:true,serialization:'json'});NET.dc=dc;
     const to=setTimeout(()=>{if(!isClient())netStatus('ИГРА НАЙДЕНА, НО СЕТЬ БЛОКИРУЕТ ПРЯМОЕ СОЕДИНЕНИЕ. НУЖЕН TURN-СЕРВЕР ИЛИ ДРУГАЯ СЕТЬ',true);},12000);
     dc.on('open',()=>{clearTimeout(to);dc.send({t:'hello',name:$('pname').value||'Друг'});});
@@ -860,6 +867,12 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
 
 loadMap(0);
 for(const b of bots)spawnEntity(b);
+$('copyinv').addEventListener('click',e=>{e.stopPropagation();copyInvite();});
+$('pname').value=LS.get('predel.name')||'Игрок';$('tuser').value=LS.get('predel.tu');$('tpass').value=LS.get('predel.tp');
+if(location.hash.length>1){const h=new URLSearchParams(location.hash.slice(1));
+  if(h.get('tu')&&h.get('tp')){$('tuser').value=h.get('tu');$('tpass').value=h.get('tp');}
+  if(h.get('join')){$('jcode').value=h.get('join').toUpperCase();if(!LS.get('predel.name'))$('pname').value='Друг';netStatus('ВАС ПРИГЛАСИЛИ В ИГРУ '+$('jcode').value+' — ВВЕДИТЕ ИМЯ И НАЖМИТЕ «ПОДКЛЮЧИТЬСЯ»');}
+  history.replaceState(null,'',location.pathname+location.search);}
 {const q=new URLSearchParams(location.search);if(q.get('name'))$('pname').value=q.get('name');if(q.get('host'))setTimeout(()=>hostGame(q.get('host').toUpperCase()),500);if(q.get('join')){$('jcode').value=q.get('join');setTimeout(()=>joinGame(q.get("join")),3500);}}
 requestAnimationFrame(frame);
 </script>
