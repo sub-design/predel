@@ -98,7 +98,7 @@ input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border
     до 20 фрагов или 10 минут · ракета под ноги = прыжок на ракете
   </div>
 </div>
-<div id="pause" class="overlay hidden"><h1 style="font-size:40px">ПАУЗА</h1><div class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div><button id="copyinv" class="hidden">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button></div>
+<div id="pause" class="overlay hidden"><h1 id="pausetitle" style="font-size:40px">ПАУЗА</h1><div id="pausehint" class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div><button id="copyinv" class="hidden">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button></div>
 <div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div class="row" style="margin-top:28px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -479,7 +479,7 @@ function hostGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   NET.code=code||randCode();netStatus('СОЗДАЁМ ИГРУ…');
   saveNetPrefs();const peer=new Peer('predel-'+NET.code,peerOpts());NET.peer=peer;
-  peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');pickMsg('КОД ИГРЫ: '+NET.code+' · ESC → СКОПИРОВАТЬ ПРИГЛАШЕНИЕ');});
+  peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');showPause(true);});
   peer.on('connection',dc=>{dc.on('open',()=>{const c={dc,q:[],ent:null};dc.on('data',d=>onHostData(c,d));dc.on('close',()=>dropConn(c));dc.on('error',()=>dropConn(c));});});
   peer.on('error',err=>{if(err.type==='unavailable-id'){peer.destroy();hostGame();}else{netStatus('ОШИБКА СЕТИ: '+err.type,true);}});}
 function onHostData(c,d){const e=c.ent;
@@ -803,12 +803,16 @@ function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadM
   requestLock();announce('В БОЙ!');}
 function endMatch(){state='end';const w=sorted()[0];nev({t:'end',w:w.nid});$('again').classList.remove('hidden');$('endtitle').innerHTML=w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;$('endboard').innerHTML=boardHTML();
   $('end').classList.remove('hidden');$('hud').style.display='none';speak(w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
+function showPause(invite){if(state!=='play')return;state='paused';mouseDown=false;updateNetInfo();
+  $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';$('pausehint').textContent=invite?'СКОПИРУЙТЕ ПРИГЛАШЕНИЕ И ОТПРАВЬТЕ ДРУГУ · КЛИК ПО ЭКРАНУ — В БОЙ':'КЛИК — ПРОДОЛЖИТЬ';
+  $('pause').classList.remove('hidden');if(locked&&document.exitPointerLock)document.exitPointerLock();}
+function resumeGame(){state='play';$('pause').classList.add('hidden');}
 function requestLock(){try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(()=>{noLock=true;});}catch(e){noLock=true;}}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;
-  if(locked&&state==='paused'){state='play';$('pause').classList.add('hidden');}
-  else if(!locked&&state==='play'&&!noLock){state='paused';updateNetInfo();$('pause').classList.remove('hidden');mouseDown=false;}});
+  if(locked&&state==='paused')resumeGame();
+  else if(!locked&&state==='play'&&!noLock)showPause(false);});
 document.addEventListener('pointerlockerror',()=>{noLock=true;});
-$('pause').addEventListener('click',()=>{if(noLock){state='play';$('pause').classList.add('hidden');}else requestLock();});
+$('pause').addEventListener('click',()=>{if(noLock||locked)resumeGame();else{requestLock();setTimeout(()=>{if(state==='paused'&&!locked)resumeGame();},400);}});
 $('start').addEventListener('click',()=>{netShutdown();startMatch();});
 $('host').addEventListener('click',()=>{initAudio();hostGame();});
 $('join').addEventListener('click',()=>joinGame($('jcode').value));
@@ -820,6 +824,7 @@ document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',
 addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;if(e.code==='Tab'||e.code==='Space')e.preventDefault();
   if(!e.repeat&&['KeyW','KeyA','KeyS','KeyD'].includes(e.code)){const now=performance.now();if(now-(lastTap[e.code]||0)<250){dodge(e.code);lastTap[e.code]=0;}else lastTap[e.code]=now;}
   keys[e.code]=true;
+  if(e.code==='Escape'&&state==='play'&&!locked)showPause(false);
   if(state==='play'){if(e.code.startsWith('Digit')){const n=+e.code.slice(5)-1;if(n>=0&&n<4)switchWeapon(player,n);}}
   if(e.code==='KeyT'){smoothTex=!smoothTex;ALL_TEX.forEach(applyFilter);pickMsg(smoothTex?'ФИЛЬТРАЦИЯ: 3D-УСКОРИТЕЛЬ':'ФИЛЬТРАЦИЯ: ПРОГРАММНАЯ');}
   if(e.code==='KeyR'){resIdx=(resIdx+1)%RES_H.length;resize();pickMsg('РАЗРЕШЕНИЕ: '+RES_H[resIdx]+'p');}
