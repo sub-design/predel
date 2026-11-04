@@ -451,6 +451,10 @@ const BOT_DEFS=[['Вектор',0xd03030],['Оса',0xe0c020],['Гранит',0x
 const bots=BOT_DEFS.map(([n,c])=>{const b=makeEntity(n,c,true);b.mesh=makeBotMesh(c);Object.assign(b,{path:null,think:0,target:null,reactT:0,alertT:0,strafePh:R()*9,strafeF:1.5+R()*1.5,stuckT:0,stuckPos:new V3(),aimErrT:0,aimErrY:0,aimErrP:0,walkPh:0});return b;});
 let ents=[...bots];
 /* ---------- network ---------- */
+// Если сеть блокирует прямое соединение, сюда добавляется TURN-ретранслятор, например:
+// {urls:['turn:ХОСТ:3478','turns:ХОСТ:443?transport=tcp'],username:'...',credential:'...'}
+const TURN_SERVERS=[];
+const PEER_OPTS={config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478']},...TURN_SERVERS]}};
 const NET={mode:'off',peer:null,conns:[],dc:null,code:'',sendT:0,nidSeq:1,byNid:new Map(),myNid:0,projSeq:1};
 const HUMAN_COLORS=[0x40e0e0,0xff80c0,0xa0ff60,0xff9040,0xb0a0ff];
 function assignNid(e){e.nid=NET.nidSeq++;NET.byNid.set(e.nid,e);}
@@ -467,7 +471,7 @@ function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br
 function hostGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   NET.code=code||randCode();netStatus('СОЗДАЁМ ИГРУ…');
-  const peer=new Peer('predel-'+NET.code);NET.peer=peer;
+  const peer=new Peer('predel-'+NET.code,PEER_OPTS);NET.peer=peer;
   peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');pickMsg('КОД ИГРЫ: '+NET.code);});
   peer.on('connection',dc=>{dc.on('open',()=>{const c={dc,q:[],ent:null};dc.on('data',d=>onHostData(c,d));dc.on('close',()=>dropConn(c));dc.on('error',()=>dropConn(c));});});
   peer.on('error',err=>{if(err.type==='unavailable-id'){peer.destroy();hostGame();}else{netStatus('ОШИБКА СЕТИ: '+err.type,true);}});}
@@ -492,9 +496,9 @@ function netTick(dt){NET.sendT-=dt;if(NET.sendT>0)return;NET.sendT=.05;for(const
 function joinGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   code=String(code||'').toUpperCase().trim();if(code.length!==4){netStatus('ВВЕДИТЕ КОД ИЗ 4 БУКВ',true);return;}
-  initAudio();netStatus('ПОДКЛЮЧЕНИЕ…');const peer=new Peer();NET.peer=peer;
+  initAudio();netStatus('ПОДКЛЮЧЕНИЕ…');const peer=new Peer(PEER_OPTS);NET.peer=peer;
   peer.on('open',()=>{const dc=peer.connect('predel-'+code,{reliable:true,serialization:'json'});NET.dc=dc;
-    const to=setTimeout(()=>{if(!isClient())netStatus('ХОСТ НЕ ОТВЕЧАЕТ. ПРОВЕРЬТЕ КОД',true);},9000);
+    const to=setTimeout(()=>{if(!isClient())netStatus('ИГРА НАЙДЕНА, НО СЕТЬ БЛОКИРУЕТ ПРЯМОЕ СОЕДИНЕНИЕ. НУЖЕН TURN-СЕРВЕР ИЛИ ДРУГАЯ СЕТЬ',true);},12000);
     dc.on('open',()=>{clearTimeout(to);dc.send({t:'hello',name:$('pname').value||'Друг'});});
     dc.on('data',onClientData);
     dc.on('close',()=>{if(isClient()){alert('Соединение с хостом потеряно');location.reload();}});});
