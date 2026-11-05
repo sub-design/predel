@@ -2,7 +2,7 @@
 // For every directed edge of every map's nav graph, a lone bot starts at node A with path [B]
 // and must reach B (same arrival rule as the bot code) within a time budget without dying.
 window.navAudit=function(maps=[0,1,2,3,4,5,6,7,8,9],opts={}){
-  const dt=1/30,res={};const b=bots[0];const savedMode=gameMode;const savedTemple=window.updateTempleFeatures;window.updateTempleFeatures=()=>{};// bridges collapse by design; test the geometry
+  const dt=1/30,res={};const b=bots[0];const savedMode=gameMode,savedTrait=b.trait;const savedTemple=window.updateTempleFeatures;window.updateTempleFeatures=()=>{};// bridges collapse by design; test the geometry
   for(const m of maps){
     loadMap(m);gameMode='ffa';state='play';matchTime=1e9;player.alive=false;player.out=true;
     for(const x of bots){x.alive=false;x.mesh.group.visible=false;}ents=[b];
@@ -20,7 +20,7 @@ window.navAudit=function(maps=[0,1,2,3,4,5,6,7,8,9],opts={}){
         if(curMap===9?hd<1.5:(hd<1.2&&Math.abs(d.y)<2.5)){ok=true;break;}}
       if(!ok)fails.push({a,t,why,minD:+minD.toFixed(1),at:b.pos.toArray().map(v=>+v.toFixed(1))});}
     res[m]={edges,fails};}
-  window.updateTempleFeatures=savedTemple;player.out=false;gameMode=savedMode;state='menu';ents=[...bots];
+  window.updateTempleFeatures=savedTemple;b.trait=savedTrait;player.out=false;gameMode=savedMode;state='menu';ents=[...bots];
   return res;};
 if(/[?&]navaudit/.test(location.search))setTimeout(()=>{const r=navAudit();console.log('NAV AUDIT',JSON.stringify(r,null,1));
   const lines=Object.entries(r).map(([m,v])=>`${MAPS[m].name}: ${v.edges-v.fails.length}/${v.edges}`+v.fails.map(f=>`\n   ${f.a}→${f.t} ${f.why} min ${f.minD} at ${f.at}`).join(''));
