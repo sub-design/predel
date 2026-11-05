@@ -89,7 +89,9 @@ button:hover{border-color:#a070d0;color:#fff}button.on{border-color:#ffd040;colo
 input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border:3px solid #4a3060;padding:11px 12px;width:110px;text-align:center;text-transform:uppercase;outline:none;box-shadow:3px 3px 0 #000}input:focus{border-color:#ffd040}
 
 #netinfo{font-size:10px;color:#9fd4ff;margin-top:10px;line-height:1.8}
-#endtitle{font-size:28px;color:#ffd040;margin-bottom:24px}
+#endtitle{font-size:28px;color:#ffd040;margin-bottom:20px}
+#end{justify-content:safe center;overflow-y:auto;padding:20px 0;box-sizing:border-box}
+.endstats{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap;max-width:94vw}.endstats .col{background:rgba(10,4,20,.88);border:3px solid #3a2a5a;padding:12px 16px;text-align:left;font-size:9px;line-height:2.1;text-transform:none;color:#ccc;min-width:240px;box-shadow:4px 4px 0 #000}.endstats .sh{color:#ffd040;font-size:10px;margin-bottom:4px}.endstats b{color:#fff;font-weight:normal}.endstats i{font-style:normal;color:#8a8a9a}.endstats .aw{color:#ff9050}
 #retrofx{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(rgba(255,255,255,.13) .55px,transparent .8px);background-size:auto,3px 3px}
 body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 @keyframes crt{50%{opacity:.67}}
@@ -189,7 +191,7 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 <div id="recon" class="overlay hidden" style="z-index:30"><div class="dlg"><div class="stitle">СВЯЗЬ ПОТЕРЯНА</div><div class="hint" id="recontxt" style="font-size:11px">Переподключаемся…</div><div class="row"><button id="reconquit">ВЫЙТИ</button></div></div></div>
 <div id="pause" class="overlay hidden"><div class="dlg"><div class="stitle" id="pausetitle">ПАУЗА</div><div id="pausewarn" class="hidden">Игра продолжается — вы уязвимы</div>
   <div class="pmenu"><button id="p_resume" class="big">ПРОДОЛЖИТЬ</button><button id="p_set">НАСТРОЙКИ</button><button id="copyinv" class="hidden">ПРИГЛАСИТЬ ДРУГА</button><div id="pausenet"></div><button id="p_lobby" class="hidden">ВЕРНУТЬ ВСЕХ В ЛОББИ</button><button id="p_quit">ВЫЙТИ</button></div></div></div>
-<div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div class="row" style="margin-top:28px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
+<div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div id="endstats"></div><div class="row" style="margin-top:20px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -1209,7 +1211,7 @@ function onHostData(c,d){const e=c.ent;
     if(state==='menu'){lobbyLog(`${nm(ne)} <span class="w">вернулся</span>`);broadcastLobby();updateNetInfo();return;}
     if(!ents.includes(ne)){ents.splice(NET.conns.length,0,ne);assignBalancedTeam(ne);ne.frags=0;ne.deaths=0;ne.lives=gameMode==='lms'?0:null;ne.out=gameMode==='lms';}if(!ne.out)spawnEntity(ne);
     c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:state==='intro',nid:ne.nid,roster:roster(),mt:matchTime,br:BRIDGES.map(b=>b.broken?1:0),rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});nev({t:'roster',r:roster()},ne);
-    if(state==='end')c.dc.send({t:'s',mt:0,gm:gameMode,ts:teamScores.slice(),e:[],pk:'',am:ne.ammo,ow:ne.owned,ev:[{t:'end',w:sorted()[0].nid,team:teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1,ts:teamScores.slice()}]});
+    if(state==='end')c.dc.send({t:'s',mt:0,gm:gameMode,ts:teamScores.slice(),e:[],pk:'',am:ne.ammo,ow:ne.owned,ev:[{t:'end',w:sorted()[0].nid,team:teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1,ts:teamScores.slice(),st:matchSummary()}]});
     feed(`${nm(ne)} <span class="w">вернулся в игру</span>`);updateNetInfo();return;}}
   if(d.t==='hello'){if(c.ent)return;const used=new Set(ents.map(x=>x.color));const col=HUMAN_COLORS.find(x=>!used.has(x))||0xffffff;
     const ne=makeEntity(String(d.name||'Друг').slice(0,10),col,false);ne.remote=true;ne.tok=d.tok||null;ne.conn=c;ne.mesh=makeBotMesh(col);ne.mesh.group.visible=false;assignNid(ne);c.ent=ne;NET.conns.push(c);
@@ -1317,7 +1319,7 @@ function clientEvent(v){const V=a=>new V3(a[0],a[1],a[2]);switch(v.t){
 function clientEnd(result){state='end';let title,voice;
   if(gameMode==='team'){teamScores=result.ts||teamScores;title=result.team==null?'НИЧЬЯ':result.team===player.team?'ВАША КОМАНДА ПОБЕДИЛА!':`${TEAM_NAMES[result.team]} ПОБЕДИЛИ`;voice=result.team===player.team?'Ваша команда победила':'Матч окончен';}
   else{const w=NET.byNid.get(result.w);title=w===player?'ВЫ ПОБЕДИЛИ!':w?`ПОБЕДИТЕЛЬ: ${nm(w)}`:'МАТЧ ОКОНЧЕН';voice=w===player?'Вы победили':'Матч окончен';}
-  $('endtitle').innerHTML=title;$('endboard').innerHTML=boardHTML()+'<div class="hint" style="margin-top:16px">Хост выбирает следующую карту…</div>';
+  $('endtitle').innerHTML=title;$('endboard').innerHTML=boardHTML();$('endstats').innerHTML=(result.st?statsHTML(result.st,player.nid):'')+'<div class="hint" style="margin-top:10px">Хост выбирает следующую карту…</div>';
   $('again').classList.add('hidden');$('tomenu').textContent='ВЫЙТИ';$('end').classList.remove('hidden');$('hud').style.display='none';showIntroCard(false);startMusic('lobby');speak(voice);if(document.exitPointerLock)document.exitPointerLock();}
 function clientFire(alt=false){const w=WEAPONS[player.weapon];
   if(player.ammo[w.id]<=0){playSnd('empty');player.cd=.3;autoSwitch(player);return;}
@@ -1396,7 +1398,7 @@ function spawnProj(e,pos,dir,w){const m=makeProjMesh(w);
 
 function fire(e,alt=false){if(isClient()){if(e===player)clientFire(alt);return;}const w=WEAPONS[e.weapon];
   if(e.ammo[w.id]<=0){if(e===player){playSnd('empty');e.cd=.3;}autoSwitch(e);return;}
-  e.ammo[w.id]--;if(modeWeapon()!=null)e.ammo[w.id]=99;e.cd=alt?(w.altRate||w.rate):w.rate;if(e.invisT>0)e.invisFlickerT=.32;
+  e.ammo[w.id]--;if(e.st)e.st.shots[w.id]++;if(modeWeapon()!=null)e.ammo[w.id]=99;e.cd=alt?(w.altRate||w.rate):w.rate;if(e.invisT>0)e.invisFlickerT=.32;
   const eye=eyePos(e),dir=aimDir(e),mz=muzzlePos(e,dir),md=eye.distanceTo(mz),mdir=mz.clone().sub(eye).normalize();
   const start=rayLevel(a3(eye),a3(mdir),md)>=md-1e-3?mz:eye.clone();
   flashLight(start,w.color,.07,2.2,10);playSnd(w.snd,e===player?null:e.pos);nev({t:'fi',e:e.nid,w:w.id},e);
@@ -1426,6 +1428,7 @@ function damage(t,amt,att,w,head){if(!att&&w&&w.lava&&t.lastAtt&&t.lastAtt!==t&&
   if(t===att)amt*=.5;
   if(t.armor>0){const ab=Math.min(t.armor,amt*.66);t.armor-=ab;amt-=ab;}
   t.health-=amt;t.hurtT=.15;
+  if(att&&att!==t&&att.st&&w&&w.id!=null){att.st.dmg+=amt+Math.min(0,t.health);if(!(att.st.hitT===time&&att.st.hitW===w.id)){att.st.hits[w.id]++;att.st.hitT=time;att.st.hitW=w.id;}}
   const src=att&&att!==t?att.pos:null;
   if(t===player){dmgFlash=Math.min(1,dmgFlash+amt/35);playSnd('hurt');addDmgDir(src);}
   else if(t.remote)sendTo(t,{t:'hu',a:Math.round(amt),p:src?a3r(src):null});
@@ -1437,6 +1440,8 @@ const MULTI=['','','ДВОЙНОЕ УБИЙСТВО','ТРОЙНОЕ УБИЙС�
 const STREAK={5:'СЕРИЯ УБИЙСТВ!',10:'НЕУДЕРЖИМ!',15:'БОГОПОДОБЕН!'};
 const nm=e=>`<span style="color:${hex(teamColorFor(e))}">${e.name}</span>`;
 function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t);t.alive=false;t.deaths++;t.streak=0;t.deadT=0;gibFX(t);playSnd('death',t===player?null:t.pos);if(t===player)speakBattleLine(DEATH_LINES);nev({t:'gib',e:t.nid});
+  if(t.st&&(!att||att===t))t.st.self++;
+  if(att&&att!==t&&att.st&&t.st){if(w&&w.id!=null)att.st.kills[w.id]++;else att.st.push++;att.st.vic[t.nid]=(att.st.vic[t.nid]||0)+1;t.st.by[att.nid]=(t.st.by[att.nid]||0)+1;att.st.best=Math.max(att.st.best,att.streak+1);}
   if(gameMode==='lms'&&t.lives!=null){t.lives--;if(t.lives<=0){t.out=true;}}
   if(!att||att===t){if(gameMode!=='koth')t.frags--;feed(`${nm(t)} <span class="w">[${w&&w.lava?w.name:'САМОПОДРЫВ'}]</span>`);}
   else{if(gameMode!=='koth')att.frags++;botSay(att,'kill',t);botSay(t,'death',att);att.streak++;if(time-att.lastKill<3)att.multi++;else att.multi=1;att.lastKill=time;
@@ -1610,6 +1615,29 @@ function deathHTML(t,att,w){const ww=w&&w.lava,where=w===VOID?'в бездну':
 function pickMsg(t){$('pickmsg').textContent=t;pickT=2;}
 function weaponHint(w){return w.id===4?'Дробь с отбросом':w.id===6?'Зажмите ПКМ для зума':'ПКМ — '+String(w.altName||'').toLowerCase();}
 function showWeaponName(){pickMsg(weaponHint(WEAPONS[player.weapon]));}
+/* post-match stats */
+const plural=(n,a,b,c)=>{const m=n%10,h=n%100;return n+' '+(m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c);};
+function matchSummary(){const out={};for(const e of ents){const s=e.st||newStats(),sh=s.shots.reduce((a,b)=>a+b,0),hi=s.hits.reduce((a,b)=>a+b,0);
+  let fw=-1,fk=0;s.kills.forEach((k,i)=>{if(k>fk){fk=k;fw=i;}});if(fw<0){let m=0;s.shots.forEach((k,i)=>{if(k>m){m=k;fw=i;}});}
+  const top=o=>{let n=0,c=0;for(const k in o)if(o[k]>c){c=o[k];n=+k;}return c?[n,c]:null;};
+  out[e.nid]={a:sh?Math.min(100,Math.round(100*hi/sh)):null,sh,fw,fk,bs:s.best,d:Math.round(s.dmg),ne:top(s.by),vi:top(s.vic),sk:s.self,pu:s.push};}
+  return out;}
+function statsHTML(sum,me){const ent=n=>NET.byNid.get(n)||ents.find(x=>x.nid===n),name=n=>{const e=ent(n);return e?nm(e):'?';};const my=sum[me];let h='<div class="endstats">';
+  if(my){h+='<div class="col"><div class="sh">ВАШ МАТЧ</div>';
+    h+=`<div>Точность <b>${my.a==null?'—':my.a+'%'}</b></div>`;
+    if(my.fw>=0)h+=`<div>Любимое оружие <b>${WEAPONS[my.fw].name}</b>${my.fk?` · ${plural(my.fk,'фраг','фрага','фрагов')}`:''}</div>`;
+    h+=`<div>Лучшая серия <b>${my.bs}</b> · урон <b>${my.d}</b></div>`;
+    h+=my.ne?`<div>Главный враг ${name(my.ne[0])} — <b>${plural(my.ne[1],'ваша смерть','ваши смерти','ваших смертей')}</b></div>`:'<div>Вас ни разу не убили</div>';
+    if(my.vi)h+=`<div>Любимая жертва ${name(my.vi[0])} — <b>${plural(my.vi[1],'фраг','фрага','фрагов')}</b></div>`;
+    h+='</div>';}
+  const ids=Object.keys(sum).map(Number),best=(f,ok=()=>true)=>{let b=null,bv=-1;for(const n of ids){const v=f(sum[n]);if(ok(sum[n])&&v>bv){bv=v;b=n;}}return b==null||bv<=0?null:[b,bv];},aw=[];
+  let x=best(s=>s.a||0,s=>s.sh>=15);if(x)aw.push(['МЕТКИЙ ГЛАЗ',x[0],x[1]+'% попаданий']);
+  x=best(s=>s.d);if(x)aw.push(['МЯСОРУБКА',x[0],x[1]+' урона']);
+  x=best(s=>s.bs);if(x&&x[1]>=3)aw.push(['НЕУДЕРЖИМЫЙ',x[0],'серия '+x[1]]);
+  x=best(s=>s.pu);if(x)aw.push(['ВЫШИБАЛА',x[0],'в пропасть: '+x[1]]);
+  x=best(s=>s.sk);if(x&&x[1]>=2)aw.push(['САМ СЕБЕ ВРАГ',x[0],'самоподрывы: '+x[1]]);
+  if(aw.length){h+='<div class="col"><div class="sh">НАГРАДЫ</div>'+aw.slice(0,4).map(([t,n,d])=>`<div><span class="aw">${t}</span> ${name(n)} <i>${d}</i></div>`).join('')+'</div>';}
+  return h+'</div>';}
 function sorted(){if(gameMode==='lms')return [...ents].sort((a,b)=>(a.out?1:0)-(b.out?1:0)||(b.lives||0)-(a.lives||0)||b.frags-a.frags||a.deaths-b.deaths);return [...ents].sort((a,b)=>b.frags-a.frags||a.deaths-b.deaths);}
 function pingTxt(e){if(e.isBot)return'БОТ';if(e.ping!=null)return e.ping+' МС';if(isHost()?e===player:!e.remote&&e!==player)return'ХОСТ';return'…';}
 function boardHTML(){const net=isHost()||isClient(),cols=net?4:3;const lms=gameMode==='lms',head=`<table><tr><th>ИГРОК</th><th class="n">${gameMode==='koth'?'ОЧКИ':'ФРАГИ'}</th><th class="n">${lms?'ЖИЗНИ':'СМЕРТИ'}</th>${net?'<th class="n">ПИНГ</th>':''}</tr>`;const row=e=>`<tr class="${e===player?'me':''}"><td>${e===player?e.name:nm(e)}</td><td class="n">${e.frags}</td><td class="n">${lms?(e.out?'—':e.lives):e.deaths}</td>${net?`<td class="n">${pingTxt(e)}</td>`:''}</tr>`;if(gameMode==='team')return head+TEAM_NAMES.map((name,t)=>`<tr class="teamhead"><td colspan="${cols}" style="color:${hex(TEAM_COLORS[t])}">${name} — ${teamScores[t]} / ${fragLimit()}</td></tr>${sorted().filter(e=>e.team===t).map(row).join('')}`).join('')+'</table>';return head+sorted().map(row).join('')+'</table>';}
@@ -1640,14 +1668,15 @@ function updateIntroCamera(){camera.up.copy(UP);const k=1-clamp(introT/3.2,0,1),
 /* ---------- game state ---------- */
 let botCount=5;
 let state='menu',time=0,matchTime=MATCH_TIME,menuAng=0,locked=false,noLock=false,introT=0,introInvitePause=false,retroMode=false,screenshotPending=false;
-function resetMatch(){for(const e of ents){e.frags=0;e.deaths=0;e.alive=false;e.hillAcc=0;e.lives=gameMode==='lms'?LMS_LIVES:null;e.out=false;if(e.isBot)e.mesh.group.visible=false;}
+function newStats(){const z=()=>Array(WEAPONS.length).fill(0);return{shots:z(),hits:z(),kills:z(),push:0,self:0,dmg:0,best:0,by:{},vic:{},hitT:-1,hitW:-1};}
+function resetMatch(){for(const e of ents){e.st=newStats();e.frags=0;e.deaths=0;e.alive=false;e.hillAcc=0;e.lives=gameMode==='lms'?LMS_LIVES:null;e.out=false;if(e.isBot)e.mesh.group.visible=false;}
   for(const p of projs)scene.remove(p.mesh);projs.length=0;for(const p of PICKUPS){p.active=true;p.mesh.visible=true;}
   firstBlood=false;matchTime=MATCH_TIME;for(const e of ents)spawnEntity(e);}
 function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];const useBots=gameMode==='duel'?(NET.conns.length?[]:[bots[(R()*bots.length)|0]]):bots.slice(0,botCount);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...useBots];for(const b of bots)if(!useBots.includes(b)){b.alive=false;b.mesh.group.visible=false;}setupHill();assignBalancedTeams();resetMatch();state='intro';introT=3.2;showIntroCard(true);
   for(const c of NET.conns){c.q=[];try{c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:true,nid:c.ent.nid,roster:roster(),mt:matchTime,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});}catch(e){}}
   hideScreens();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';$('feed').innerHTML='';feedList.length=0;$('chatlog').innerHTML='';chatList.length=0;
   startMusic('battle');}
-function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice()}:{t:'end',w:w.nid});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;$('endboard').innerHTML=boardHTML();
+function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice(),st:matchSummary()}:{t:'end',w:w.nid,st:matchSummary()});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;const sum=matchSummary();$('endboard').innerHTML=boardHTML();$('endstats').innerHTML=statsHTML(sum,player.nid);
   $('end').classList.remove('hidden');$('hud').style.display='none';startMusic('lobby');speak(gameMode==='team'?(teamWinner==null?'Ничья':`${TEAM_NAMES[teamWinner]} победили`):w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
 function showPause(invite){if(state!=='play')return;closeChat();state='paused';mouseDown=false;mouseAltDown=false;updateNetInfo();
   $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';
