@@ -31,7 +31,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;image-rendering:crisp-edg
 #feed .chat{color:#e8f0ff;text-transform:none}
 #chatin{position:fixed;left:24px;bottom:96px;width:440px;max-width:calc(100vw - 48px);font:inherit;font-size:11px;padding:8px 10px;background:rgba(10,4,20,.9);color:#fff;border:2px solid #6a3a8a;outline:none;text-transform:none;z-index:6}
 #settings .row{flex-wrap:wrap;gap:14px;align-items:center}#settings label{display:flex;align-items:center;gap:6px;font-size:10px;color:#ccc}#settings input[type=range]{width:110px;accent-color:#ffd040}#settings span{min-width:34px;text-align:left;color:#ffd040}
-#pause #settings{margin-top:26px}
+#setdlg,#helpdlg{z-index:20}.pmenu{display:flex;flex-direction:column;gap:12px;align-items:stretch;min-width:300px}.pmenu button{margin:0}#pausewarn{color:#f96;font-size:11px;margin:-8px 0 20px;line-height:1.6}#pausenet{color:#9fd4ff;font-size:10px;margin:-4px 0 4px}#p_quit{border-color:#a33;color:#f99}#settings .row+.row{margin-top:14px}
 #menu,#setup,#joinscr{justify-content:safe center;overflow-y:auto;padding:20px 0;box-sizing:border-box}
 .mainbtns{display:flex;flex-direction:column;gap:14px;width:420px;max-width:90vw;margin-bottom:28px}.mainbtns button{width:100%}
 .field{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 18px;font-size:10px;color:#aaa}.field input{width:170px;text-transform:none}
@@ -170,17 +170,19 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 
 <div id="setdlg" class="overlay hidden"><div class="dlg"><div class="stitle">НАСТРОЙКИ</div><div id="setdlgbody"><div class="opts" id="settings">НАСТРОЙКИ
     <div class="row"><label>МЫШЬ <input type="range" id="s_sens" min="0.2" max="3" step="0.05"><span id="v_sens"></span></label><label>ОБЗОР <input type="range" id="s_fov" min="60" max="110" step="1"><span id="v_fov"></span></label><label>ГРОМКОСТЬ <input type="range" id="s_vol" min="0" max="100" step="5"><span id="v_vol"></span></label><button id="s_inv"></button></div>
+    <div class="row"><button id="s_res"></button><button id="s_fx"></button><button id="s_flt"></button><button id="s_mus"></button></div>
   </div></div><button class="dlgclose">ГОТОВО</button></div></div>
 <div id="helpdlg" class="overlay hidden"><div class="dlg"><div class="stitle">УПРАВЛЕНИЕ</div>
   <div class="help">
     <b>WASD</b> — бег · <b>ПРОБЕЛ</b> — прыжок · <b>двойное нажатие WASD</b> — уклонение<br>
     <b>ЛКМ</b> — огонь · <b>ПКМ</b> — альтернативный · <b>1–7 / колесо</b> — оружие · <b>TAB</b> — таблица<br>
     <b>T / ENTER</b> — чат · <b>E</b> — рубильник на Реакторе · <b>ESC</b> — пауза<br>
-    <b>P</b> — 3DFX · <b>F12</b> — скриншот · <b>L</b> — фильтр · <b>R</b> — разрешение · <b>M</b> — звук<br>
+    <b>F12</b> — скриншот · разрешение, 3DFX, фильтр и музыка — в настройках<br>
     до 20 фрагов или 10 минут · ракета под ноги = прыжок на ракете
   </div><button class="dlgclose">ПОНЯТНО</button></div></div>
 
-<div id="pause" class="overlay hidden"><h1 id="pausetitle" style="font-size:40px">ПАУЗА</h1><div id="pausehint" class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div><button id="copyinv" class="hidden">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button></div>
+<div id="pause" class="overlay hidden"><div class="dlg"><div class="stitle" id="pausetitle">ПАУЗА</div><div id="pausewarn" class="hidden">Игра продолжается — вы уязвимы</div>
+  <div class="pmenu"><button id="p_resume" class="big">ПРОДОЛЖИТЬ</button><button id="p_set">НАСТРОЙКИ</button><button id="copyinv" class="hidden">ПРИГЛАСИТЬ ДРУГА</button><div id="pausenet"></div><button id="p_lobby" class="hidden">ВЕРНУТЬ ВСЕХ В ЛОББИ</button><button id="p_quit">ВЫЙТИ</button></div></div></div>
 <div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div class="row" style="margin-top:28px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -936,7 +938,7 @@ function railFX(a,b,color){beam(a,b,color,.9,.07);beam(a,b,0xffffff,.3,.02);
 /* ---------- audio ---------- */
 let AC=null,master,sfxFilter,nbuf,muted=false,musicBus=null,musicComp=null,battleDriveCurve=null,musicTimer=null,musicStep=0,nextMusicTime=0,musicOn=false,musicMode='';
 const MUSIC_BPM=118,MUSIC_BARS=64,MUSIC_STEPS=MUSIC_BARS*16,MUSIC_VOL=.68;
-function initAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=SET.vol/160;master.connect(AC.destination);sfxFilter=AC.createBiquadFilter();sfxFilter.type='lowpass';sfxFilter.frequency.value=22000;sfxFilter.connect(master);musicBus=AC.createGain();musicBus.gain.value=muted?0:MUSIC_VOL;musicComp=AC.createDynamicsCompressor();musicComp.threshold.value=-14;musicComp.knee.value=10;musicComp.ratio.value=2.5;musicComp.attack.value=.008;musicComp.release.value=.22;musicBus.connect(musicComp);musicComp.connect(master);battleDriveCurve=new Float32Array(512);for(let i=0;i<battleDriveCurve.length;i++){const x=i*2/(battleDriveCurve.length-1)-1;battleDriveCurve[i]=Math.tanh(x*4)/Math.tanh(4);}nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;}}
+function initAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=SET.vol/160;master.connect(AC.destination);sfxFilter=AC.createBiquadFilter();sfxFilter.type='lowpass';sfxFilter.frequency.value=22000;sfxFilter.connect(master);musicBus=AC.createGain();musicBus.gain.value=(muted||!SET.music)?0:MUSIC_VOL;musicComp=AC.createDynamicsCompressor();musicComp.threshold.value=-14;musicComp.knee.value=10;musicComp.ratio.value=2.5;musicComp.attack.value=.008;musicComp.release.value=.22;musicBus.connect(musicComp);musicComp.connect(master);battleDriveCurve=new Float32Array(512);for(let i=0;i<battleDriveCurve.length;i++){const x=i*2/(battleDriveCurve.length-1)-1;battleDriveCurve[i]=Math.tanh(x*4)/Math.tanh(4);}nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;}}
 const _right=new V3();
 function out(pos){let v=1,pan=0;if(pos){const dx=pos.x-camera.position.x,dy=pos.y-camera.position.y,dz=pos.z-camera.position.z,dist=Math.hypot(dx,dy,dz);v=Math.max(0,1-dist/70);v*=v;if(v<.01)return null;_right.setFromMatrixColumn(camera.matrixWorld,0);pan=clamp((dx*_right.x+dy*_right.y+dz*_right.z)/(dist+.001),-1,1)*.8;}
   const g=AC.createGain();g.gain.value=v;if(AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=pan;g.connect(p);p.connect(sfxFilter);}else g.connect(sfxFilter);return g;}
@@ -1001,9 +1003,9 @@ function scheduleBattleStep(step,t){
   if(section===1||section===3){const lead=[24,null,null,22,null,19,null,17,19,null,22,null,24,22,19,null][i];if(lead!==null)musicTone(musicMidi(root+lead),t,.10,'square',.038,3200);}
 }
 function scheduleMusic(){if(!musicOn||!AC)return;const horizon=AC.currentTime+.12,bpm=musicMode==='battle'?148:MUSIC_BPM,stepDur=60/bpm/4;while(nextMusicTime<horizon){if(musicMode==='battle')scheduleBattleStep(musicStep,nextMusicTime);else scheduleMusicStep(musicStep,nextMusicTime);musicStep=(musicStep+1)%MUSIC_STEPS;nextMusicTime+=stepDur;}}
-function startMusic(mode='battle'){if(!AC)initAudio();if(!AC)return;if(musicOn&&musicMode===mode)return;if(musicTimer)clearInterval(musicTimer);musicOn=true;musicMode=mode;musicStep=0;nextMusicTime=AC.currentTime+.08;if(AC.state==='suspended')AC.resume().catch(()=>{});if(musicBus){musicBus.gain.cancelScheduledValues(AC.currentTime);musicBus.gain.setValueAtTime(musicBus.gain.value,AC.currentTime);musicBus.gain.setTargetAtTime(0,AC.currentTime,.02);musicBus.gain.setTargetAtTime(muted?0:MUSIC_VOL,AC.currentTime+.08,.035);}musicTimer=setInterval(scheduleMusic,25);}
+function startMusic(mode='battle'){if(!AC)initAudio();if(!AC)return;if(musicOn&&musicMode===mode)return;if(musicTimer)clearInterval(musicTimer);musicOn=true;musicMode=mode;musicStep=0;nextMusicTime=AC.currentTime+.08;if(AC.state==='suspended')AC.resume().catch(()=>{});if(musicBus){musicBus.gain.cancelScheduledValues(AC.currentTime);musicBus.gain.setValueAtTime(musicBus.gain.value,AC.currentTime);musicBus.gain.setTargetAtTime(0,AC.currentTime,.02);musicBus.gain.setTargetAtTime((muted||!SET.music)?0:MUSIC_VOL,AC.currentTime+.08,.035);}musicTimer=setInterval(scheduleMusic,25);}
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}musicOn=false;}
-function setMusicMuted(value){if(musicBus&&AC)musicBus.gain.setTargetAtTime(value?0:MUSIC_VOL,AC.currentTime,.035);}
+function setMusicMuted(value){if(musicBus&&AC)musicBus.gain.setTargetAtTime((value||!SET.music)?0:MUSIC_VOL,AC.currentTime,.035);}
 function speak(t,style='announcer'){try{if(muted||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.toLowerCase());u.lang='ru-RU';u.pitch=style==='brutal'?.16:.3;u.rate=style==='brutal'?.82:.85;u.volume=.95;speechSynthesis.speak(u);}catch(e){}}
 const DEATH_LINES=['Чёрт. Меня сняли.','Не последний раз.','Хороший выстрел. Я вернусь.','Встретимся ещё.'];
 const RESPAWN_LINES=['Я снова в бою.','Вернулся. Открывай огонь.','Теперь моя очередь.','Давай начнём заново.'];
@@ -1034,7 +1036,7 @@ let ents=[...bots];
 // Логин/пароль TURN вводятся в меню (хранятся только в этом браузере) или приходят в ссылке-приглашении после '#'.
 const TURN_URLS=['turn:global.relay.metered.ca:80','turn:global.relay.metered.ca:80?transport=tcp','turn:global.relay.metered.ca:443','turns:global.relay.metered.ca:443?transport=tcp'];
 const LS={get(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
-const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1'};
+const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1'};
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE_WEAPON={insta:3,rocket:2},modeWeapon=()=>MODE_WEAPON[gameMode];
 const MODE_NAMES={ffa:'КАЖДЫЙ ЗА СЕБЯ',team:'КОМАНДНЫЙ БОЙ',insta:'ИНСТАГИБ',rocket:'РАКЕТНАЯ АРЕНА'},MODE_ANN={ffa:'В БОЙ!',team:'КРАСНЫЕ ПРОТИВ СИНИХ!',insta:'ИНСТАГИБ! ОДИН ВЫСТРЕЛ — ОДИН ФРАГ',rocket:'РАКЕТНАЯ АРЕНА!'};
@@ -1043,7 +1045,7 @@ function myName(){return($('pname').value||'Игрок').trim().slice(0,10)||'И
 function saveNetPrefs(){LS.set('predel.name',$('pname').value);LS.set('predel.tu',$('tuser').value.trim());LS.set('predel.tp',$('tpass').value.trim());}
 function peerOpts(){const ice=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478','stun:stun.relay.metered.ca:80']}];const t=turnCreds();if(t)ice.push({urls:TURN_URLS,username:t.u,credential:t.p});return{config:{iceServers:ice}};}
 function inviteLink(){const t=turnCreds();let h='join='+NET.code+'&h='+encodeURIComponent(myName());if(t)h+='&tu='+encodeURIComponent(t.u)+'&tp='+encodeURIComponent(t.p);return location.origin+location.pathname+'#'+h;}
-async function copyInvite(){const l=inviteLink();try{await navigator.clipboard.writeText(l);pickMsg('ПРИГЛАШЕНИЕ СКОПИРОВАНО');for(const id of ['copyinv','linv'])$(id).textContent='СКОПИРОВАНО ✓';}catch(e){prompt('Скопируйте ссылку-приглашение:',l);}setTimeout(()=>{for(const id of ['copyinv','linv'])$(id).textContent='СКОПИРОВАТЬ ПРИГЛАШЕНИЕ';},2000);}
+async function copyInvite(){const l=inviteLink();try{await navigator.clipboard.writeText(l);pickMsg('ПРИГЛАШЕНИЕ СКОПИРОВАНО');for(const id of ['copyinv','linv']){const b=$(id);if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent='СКОПИРОВАНО ✓';}}catch(e){prompt('Скопируйте ссылку-приглашение:',l);}setTimeout(()=>{for(const id of ['copyinv','linv']){const b=$(id);if(b.dataset.l)b.textContent=b.dataset.l;}},2000);}
 const NET={mode:'off',peer:null,conns:[],dc:null,code:'',sendT:0,nidSeq:1,byNid:new Map(),myNid:0,projSeq:1};
 const HUMAN_COLORS=[0x40e0e0,0xff80c0,0xa0ff60,0xff9040,0xb0a0ff];
 function assignNid(e){e.nid=NET.nidSeq++;NET.byNid.set(e.nid,e);}
@@ -1064,7 +1066,7 @@ function assignBalancedTeam(e){
 function roster(){return ents.map(e=>({n:e.nid,nm:e.name,c:e.color,b:!!e.isBot,t:e.team}));}
 function netStatus(t,err){document.querySelectorAll('.netmsg').forEach(el=>{el.textContent=t;el.classList.toggle('err',!!err);});}
 function randCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=A[(Math.random()*A.length)|0];return c;}
-function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br>ИГРОКОВ: ${1+NET.conns.length}`;else if(isClient())t='СЕТЕВАЯ ИГРА';$('netinfo').innerHTML=t;$('pausenet').innerHTML=isHost()?`КОД ДЛЯ ДРУГА: ${NET.code} · ИГРА ПРОДОЛЖАЕТСЯ${turnCreds()?'':'<br><span style="color:#f96">РЕТРАНСЛЯТОР НЕ ЗАДАН — ИЗ ДРУГОЙ СЕТИ МОЖЕТ НЕ ПОДКЛЮЧИТЬСЯ</span>'}`:'';$('copyinv').classList.toggle('hidden',!isHost());}
+function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br>ИГРОКОВ: ${1+NET.conns.length}`;else if(isClient())t='СЕТЕВАЯ ИГРА';$('netinfo').innerHTML=t;$('pausenet').innerHTML=isHost()?`Код игры: ${NET.code}${turnCreds()?'':'<br><span style="color:#f96">Ретранслятор не задан — из другой сети могут не подключиться</span>'}`:'';$('copyinv').classList.toggle('hidden',!isHost());$('pausenet').classList.toggle('hidden',!isHost());$('p_lobby').classList.toggle('hidden',!isHost());$('pausewarn').classList.toggle('hidden',!isHost()&&!isClient());$('p_quit').textContent=isHost()||isClient()?'ВЫЙТИ':'ВЫЙТИ В МЕНЮ';}
 function hostGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   NET.code=code||randCode();netStatus('СОЗДАЁМ ИГРУ…');
@@ -1102,7 +1104,7 @@ function joinGame(code){
     const to=setTimeout(()=>{if(!isClient())netStatus('Игра найдена, но сеть не даёт соединиться напрямую. Попросите у хоста свежую ссылку-приглашение (в ней есть ретранслятор) или попробуйте другую сеть.',true);},12000);
     dc.on('open',()=>{clearTimeout(to);dc.send({t:'hello',name:myName()});});
     dc.on('data',onClientData);
-    dc.on('close',()=>{if(isClient()){alert('Хост закрыл игру или связь пропала.');location.reload();}});});
+    dc.on('close',()=>{if(isClient()){try{sessionStorage.setItem('predel.bye','1');}catch(e){}leaveGame();}});});
   peer.on('error',err=>{netStatus(err.type==='peer-unavailable'?'Игра с таким кодом не найдена. Проверьте код и что хост ещё в игре.':'Не удалось подключиться ('+err.type+'). Попробуйте ещё раз.',true);});}
 function netSend(o){if(NET.dc&&NET.dc.open){try{NET.dc.send(o);}catch(e){}}}
 function applyRoster(r){const keep=new Set();const list=[];
@@ -1446,17 +1448,24 @@ function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadM
   startMusic('battle');}
 function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice()}:{t:'end',w:w.nid});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;$('endboard').innerHTML=boardHTML();
   $('end').classList.remove('hidden');$('hud').style.display='none';startMusic('lobby');speak(gameMode==='team'?(teamWinner==null?'Ничья':`${TEAM_NAMES[teamWinner]} победили`):w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
-function showPause(invite){if(state!=='play')return;closeChat();state='paused';$('pause').appendChild($('settings'));mouseDown=false;mouseAltDown=false;updateNetInfo();
-  $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';$('pausehint').textContent=invite?'СКОПИРУЙТЕ ПРИГЛАШЕНИЕ И ОТПРАВЬТЕ ДРУГУ · КЛИК ПО ЭКРАНУ — В БОЙ':'КЛИК — ПРОДОЛЖИТЬ';
+function showPause(invite){if(state!=='play')return;closeChat();state='paused';mouseDown=false;mouseAltDown=false;updateNetInfo();
+  $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';
   $('pause').classList.remove('hidden');if(locked&&document.exitPointerLock)document.exitPointerLock();}
-function resumeGame(){if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();state='play';$('pause').classList.add('hidden');}
+function resumeGame(){if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();state='play';$('pause').classList.add('hidden');$('setdlg').classList.add('hidden');}
 noLock=!canvas.requestPointerLock;
 function requestLock(){if(noLock||locked)return;try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;
   if(locked&&state==='paused')resumeGame();
   else if(!locked&&state==='play')showPause(false);});
 document.addEventListener('pointerlockerror',()=>{});
-$('pause').addEventListener('click',()=>{if(noLock||locked)resumeGame();else{requestLock();setTimeout(()=>{if(state==='paused'&&!locked)resumeGame();},400);}});
+function tryResume(){if(state!=='paused')return;if(noLock||locked)resumeGame();else{requestLock();setTimeout(()=>{if(state==='paused'&&!locked)resumeGame();},400);}}
+$('pause').addEventListener('click',e=>{if(e.target===$('pause'))tryResume();});
+$('p_resume').addEventListener('click',tryResume);
+$('p_set').addEventListener('click',()=>{$('setdlgbody').appendChild($('settings'));$('setdlg').classList.remove('hidden');});
+$('p_lobby').addEventListener('click',()=>{if(!isHost())return;if(NET.conns.length&&!confirm('Прервать матч и вернуть всех в лобби?'))return;enterLobby();});
+$('p_quit').addEventListener('click',()=>{if(isClient()){if(confirm('Выйти из игры?'))leaveGame();return;}
+  if(isHost()){if(NET.conns.length&&!confirm('Выйти? Игра закроется для всех.'))return;netShutdown();}
+  setupMode='solo';netStatus('');toMenuWorld();showScreen('menu');});
 $('start').addEventListener('click',()=>{if(isClient())return;if(!isHost())netShutdown();startMatch();});
 $('join').addEventListener('click',()=>joinGame($('jcode').value));
 $('jcode').addEventListener('keydown',e=>{if(e.key==='Enter')joinGame($('jcode').value);});
@@ -1488,7 +1497,7 @@ function lobbyState(c){return{t:'lobby',map:selMap,mode:selectedMode,bots:botCou
 function broadcastLobby(){if(!isHost())return;for(const c of NET.conns){if(!c.ent)continue;try{c.dc.send(lobbyState(c));}catch(e){}}if(setupMode==='host')renderPlayers(lobbyPlayers(),player.nid);}
 let lobbySoonT=0;function broadcastLobbySoon(){if(!isHost())return;clearTimeout(lobbySoonT);lobbySoonT=setTimeout(broadcastLobby,60);}
 function lobbyLog(h){const d=document.createElement('div');d.innerHTML=h;$('lchat').appendChild(d);while($('lchat').children.length>40)$('lchat').firstChild.remove();$('lchat').scrollTop=1e9;}
-function toMenuWorld(){state='menu';closeChat();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';showIntroCard(false);player.alive=false;
+function toMenuWorld(){state='menu';if(locked&&document.exitPointerLock)document.exitPointerLock();closeChat();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';showIntroCard(false);player.alive=false;
   if(document.exitPointerLock&&locked)document.exitPointerLock();if(isClient()){for(const x of NET.byNid.values())if(x!==player&&!bots.includes(x)&&x.mesh)x.mesh.group.visible=false;clearCProjs();}
   for(const e of NET.conns)if(e.ent){e.ent.alive=false;e.ent.mesh.group.visible=false;}
   ents=[...bots];for(const b of bots){b.frags=b.deaths=0;spawnEntity(b);}startMusic('lobby');}
@@ -1514,14 +1523,21 @@ $('m_help').addEventListener('click',()=>$('helpdlg').classList.remove('hidden')
 document.querySelectorAll('.dlgclose').forEach(b=>b.addEventListener('click',()=>b.closest('.overlay').classList.add('hidden')));
 for(const id of ['tuser','tpass'])$(id).addEventListener('change',saveNetPrefs);
 buildMapCards();updateDiffRow();
+try{if(sessionStorage.getItem('predel.bye')){sessionStorage.removeItem('predel.bye');setTimeout(()=>netStatus('Хост закрыл игру или связь пропала.'),0);}}catch(e){}
 /* ---------- settings ---------- */
-function syncSettingsUI(){$('s_sens').value=SET.sens;$('v_sens').textContent=SET.sens.toFixed(2);$('s_fov').value=SET.fov;$('v_fov').textContent=SET.fov+'°';$('s_vol').value=SET.vol;$('v_vol').textContent=SET.vol+'%';$('s_inv').textContent='ИНВЕРСИЯ: '+(SET.inv?'ВКЛ':'ВЫКЛ');$('s_inv').classList.toggle('on',SET.inv);}
-function saveSettings(){LS.set('predel.sens',SET.sens);LS.set('predel.fov',SET.fov);LS.set('predel.vol',SET.vol);LS.set('predel.inv',SET.inv?'1':'0');if(master)master.gain.value=SET.vol/160;syncSettingsUI();}
+function syncSettingsUI(){$('s_sens').value=SET.sens;$('v_sens').textContent=SET.sens.toFixed(2);$('s_fov').value=SET.fov;$('v_fov').textContent=SET.fov+'°';$('s_vol').value=SET.vol;$('v_vol').textContent=SET.vol+'%';$('s_inv').textContent='ИНВЕРСИЯ: '+(SET.inv?'ВКЛ':'ВЫКЛ');$('s_inv').classList.toggle('on',SET.inv);$('s_res').textContent='РАЗРЕШЕНИЕ: '+RES_H[SET.res]+'p';$('s_fx').textContent='3DFX: '+(SET.fx?'ВКЛ':'ВЫКЛ');$('s_fx').classList.toggle('on',SET.fx);$('s_flt').textContent='ТЕКСТУРЫ: '+(SET.smooth?'ГЛАДКИЕ':'ПИКСЕЛИ');$('s_mus').textContent='МУЗЫКА: '+(SET.music?'ВКЛ':'ВЫКЛ');$('s_mus').classList.toggle('on',SET.music);}
+function saveSettings(){LS.set('predel.sens',SET.sens);LS.set('predel.fov',SET.fov);LS.set('predel.vol',SET.vol);LS.set('predel.inv',SET.inv?'1':'0');LS.set('predel.mus',SET.music?'1':'0');LS.set('predel.res',SET.res);LS.set('predel.fx',SET.fx?'1':'0');LS.set('predel.flt',SET.smooth?'1':'0');if(master)master.gain.value=SET.vol/160;syncSettingsUI();}
 $('s_sens').addEventListener('input',e=>{SET.sens=+e.target.value;saveSettings();});
 $('s_fov').addEventListener('input',e=>{SET.fov=+e.target.value;saveSettings();});
 $('s_vol').addEventListener('input',e=>{SET.vol=+e.target.value;saveSettings();});
 $('s_vol').addEventListener('change',()=>{initAudio();playSnd('pickup');});
 $('s_inv').addEventListener('click',()=>{SET.inv=!SET.inv;saveSettings();});
+function applyGfx(){SET.res=Math.max(0,Math.min(RES_H.length-1,SET.res|0));if(resIdx!==SET.res){resIdx=SET.res;resize();}if(retroMode!==SET.fx){retroMode=SET.fx;document.body.classList.toggle('retro',retroMode);}if(smoothTex!==SET.smooth){smoothTex=SET.smooth;ALL_TEX.forEach(applyFilter);}setMusicMuted(muted);}
+$('s_res').addEventListener('click',()=>{SET.res=(SET.res+1)%RES_H.length;applyGfx();saveSettings();});
+$('s_fx').addEventListener('click',()=>{SET.fx=!SET.fx;applyGfx();saveSettings();});
+$('s_flt').addEventListener('click',()=>{SET.smooth=!SET.smooth;applyGfx();saveSettings();});
+$('s_mus').addEventListener('click',()=>{SET.music=!SET.music;applyGfx();saveSettings();});
+applyGfx();
 for(const ev of ['click','mousedown'])$('settings').addEventListener(ev,e=>e.stopPropagation());
 syncSettingsUI();
 function settingsToMenu(){$('setdlgbody').appendChild($('settings'));}
@@ -1539,9 +1555,7 @@ addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.target
   if(e.code==='Escape'&&state==='play'&&!locked)showPause(false);
   if(state==='play'){if(e.code==='KeyE'&&!e.repeat)requestReactorSwitch();if(e.code.startsWith('Digit')){const n=+e.code.slice(5)-1;if(n>=0&&n<WEAPONS.length)switchWeapon(player,n);}}
   if(state==='play'&&(e.code==='KeyT'||e.code==='Enter')&&!e.repeat){e.preventDefault();openChat();return;}
-  if(e.code==='KeyL'){smoothTex=!smoothTex;ALL_TEX.forEach(applyFilter);pickMsg(smoothTex?'ФИЛЬТРАЦИЯ: 3D-УСКОРИТЕЛЬ':'ФИЛЬТРАЦИЯ: ПРОГРАММНАЯ');}
-  if(e.code==='KeyR'){resIdx=(resIdx+1)%RES_H.length;resize();pickMsg('РАЗРЕШЕНИЕ: '+RES_H[resIdx]+'p');}
-  if(e.code==='KeyM'){muted=!muted;setMusicMuted(muted);pickMsg(muted?'ЗВУК ВЫКЛ':'ЗВУК ВКЛ');}if(e.code==='KeyP'){retroMode=!retroMode;document.body.classList.toggle('retro',retroMode);pickMsg(retroMode?'РЕЖИМ 3DFX ВКЛ':'РЕЖИМ 3DFX ВЫКЛ');}if(e.code==='F12'&&!e.repeat){e.preventDefault();screenshotPending=true;}});
+  if(e.code==='F12'&&!e.repeat){e.preventDefault();screenshotPending=true;}});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseDown=false;mouseAltDown=false;});
 canvas.addEventListener('mousedown',e=>{if(e.button===0)mouseDown=true;if(e.button===2)mouseAltDown=true;if(state==='play'&&!locked)requestLock();});
