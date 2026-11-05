@@ -32,7 +32,28 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;image-rendering:crisp-edg
 #chatin{position:fixed;left:24px;bottom:96px;width:440px;max-width:calc(100vw - 48px);font:inherit;font-size:11px;padding:8px 10px;background:rgba(10,4,20,.9);color:#fff;border:2px solid #6a3a8a;outline:none;text-transform:none;z-index:6}
 #settings .row{flex-wrap:wrap;gap:14px;align-items:center}#settings label{display:flex;align-items:center;gap:6px;font-size:10px;color:#ccc}#settings input[type=range]{width:110px;accent-color:#ffd040}#settings span{min-width:34px;text-align:left;color:#ffd040}
 #pause #settings{margin-top:26px}
-#menu{justify-content:safe center;overflow-y:auto;padding:20px 0}
+#menu,#setup,#joinscr{justify-content:safe center;overflow-y:auto;padding:20px 0;box-sizing:border-box}
+.mainbtns{display:flex;flex-direction:column;gap:14px;width:420px;max-width:90vw;margin-bottom:28px}.mainbtns button{width:100%}
+.field{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 18px;font-size:10px;color:#aaa}.field input{width:170px;text-transform:none}
+button.link{background:none;border:none;box-shadow:none;color:#a080c0;font-size:10px;padding:6px 10px;text-decoration:underline}button.link:hover{color:#fff}
+.stitle{font-size:22px;color:#ffd040;margin-bottom:22px;letter-spacing:2px;text-shadow:3px 3px 0 #000}
+.hint{font-size:9px;line-height:1.9;color:#9a9aaa;text-transform:none;max-width:520px;margin:8px auto}
+.setupwrap{display:flex;gap:28px;align-items:flex-start;justify-content:center;max-width:96vw}
+.setupmain{max-width:720px}.setupmain.ro #mode,.setupmain.ro #maps,.setupmain.ro #botn,.setupmain.ro #diffrow{pointer-events:none}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.cards button{padding:9px 6px;font-size:9px;display:flex;flex-direction:column;gap:7px;align-items:center;min-height:62px;justify-content:center}
+.cards button span{font-size:8px;line-height:1.6;color:#8a8a9a;text-transform:none}.cards button.on span{color:#d8c070}
+#mode button{font-size:10px;padding:10px 12px;white-space:nowrap}#mode.row{flex-wrap:wrap}
+#diffrow{align-items:center}#diffrow .lbl{font-size:9px;color:#888;margin-right:4px}#diff{display:flex;gap:10px}
+.lobbyside{width:300px;background:rgba(10,4,20,.88);border:3px solid #6a3a8a;padding:16px;box-shadow:6px 6px 0 #000;text-align:left;font-size:10px}
+.ltitle{font-size:10px;color:#a080c0;margin-bottom:10px}
+#lplayers div{padding:6px 0;border-bottom:1px solid #2a1a3a;display:flex;justify-content:space-between;text-transform:none}#lplayers .me{color:#ffd040}#lplayers i{font-style:normal;color:#888;font-size:8px}
+#linv{width:100%;margin-top:12px;font-size:10px}
+#lchat{height:110px;overflow-y:auto;font-size:9px;line-height:1.8;text-transform:none;color:#ccc;background:#0c0814;padding:6px;border:2px solid #2a1a3a}
+#lchatin{width:100%;box-sizing:border-box;text-align:left;text-transform:none;font-size:9px;padding:8px;margin-top:6px}
+#turnbox{margin-top:14px;font-size:9px;color:#888}#turnbox summary{cursor:pointer}#turnbox input{width:120px;font-size:9px;text-transform:none}
+.netmsg{margin-top:12px;font-size:10px;color:#9f9;min-height:14px;line-height:1.8;text-transform:none}.netmsg.err{color:#ff6050}
+.dlg{background:rgba(10,4,20,.95);border:3px solid #6a3a8a;padding:24px 28px;box-shadow:6px 6px 0 #000;max-width:92vw}.dlg .help{margin:0 0 20px}.dlg #settings{margin-bottom:22px}
 #announce{position:absolute;top:22%;width:100%;text-align:center;font-size:30px;color:#ff3828;letter-spacing:2px;text-shadow:3px 3px 0 #300}
 #center{position:absolute;top:60%;width:100%;text-align:center;font-size:12px;line-height:2.2}
 #pickmsg{position:absolute;bottom:96px;width:100%;text-align:center;font-size:11px;color:#9f9}
@@ -62,7 +83,7 @@ button:hover{border-color:#a070d0;color:#fff}button.on{border-color:#ffd040;colo
 .help{margin-top:36px;font-size:9px;line-height:2.3;color:#8a8a9a}
 .help b{color:#ccc;font-weight:normal}
 input{font-family:inherit;font-size:12px;color:#ffd040;background:#0c0814;border:3px solid #4a3060;padding:11px 12px;width:110px;text-align:center;text-transform:uppercase;outline:none;box-shadow:3px 3px 0 #000}input:focus{border-color:#ffd040}
-#netstatus{margin-top:12px;font-size:10px;color:#9f9;min-height:14px;line-height:1.8}#netstatus.err{color:#ff6050}
+
 #netinfo{font-size:10px;color:#9fd4ff;margin-top:10px;line-height:1.8}
 #endtitle{font-size:28px;color:#ffd040;margin-bottom:24px}
 #retrofx{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(rgba(255,255,255,.13) .55px,transparent .8px);background-size:auto,3px 3px}
@@ -95,35 +116,70 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 <div id="menu" class="overlay">
   <h1>ПРЕДЕЛ</h1>
   <div class="sub">АРЕНА · DEATHMATCH · 1999</div>
-  <div class="opts">РЕЖИМ ИГРЫ
+  <div class="mainbtns">
+    <button id="m_solo" class="big">ИГРАТЬ ОДНОМУ</button>
+    <button id="m_host">СОЗДАТЬ ИГРУ С ДРУЗЬЯМИ</button>
+    <button id="m_join">ВОЙТИ ПО КОДУ</button>
+  </div>
+  <div class="field"><label for="pname">Ваше имя</label><input id="pname" maxlength="10" autocomplete="off"></div>
+  <div class="row"><button class="link" id="m_set">НАСТРОЙКИ</button><button class="link" id="m_help">УПРАВЛЕНИЕ</button></div>
+  <div class="netmsg"></div>
+</div>
+
+<div id="setup" class="overlay hidden">
+  <div class="setupwrap">
+    <div class="setupmain" id="setupmain">
+      <div class="stitle" id="setuptitle">ОДИНОЧНАЯ ИГРА</div>
+      <div class="opts">РЕЖИМ
     <div class="row" id="mode"><button data-mode="ffa" class="on">КАЖДЫЙ ЗА СЕБЯ</button><button data-mode="team">КОМАНДНЫЙ БОЙ</button><button data-mode="insta">ИНСТАГИБ</button><button data-mode="rocket">РАКЕТНАЯ АРЕНА</button></div>
-  </div>
-  <div class="opts">СЛОЖНОСТЬ БОТОВ
-    <div class="row" id="diff"><button data-d="0">НОВИЧОК</button><button data-d="1" class="on">БОЕЦ</button><button data-d="2">МАСТЕР</button></div>
-  </div>
-  <div class="opts">КАРТА
-    <div class="row" id="maps"><button data-m="0" class="on">БАСТИОН</button><button data-m="1">ЛИТЕЙНЯ</button><button data-m="2">ОРБИТА</button><button data-m="3">ПОЛИГОН</button><button data-m="4">ХРАМ</button><button data-m="5">КРЫШИ</button><button data-m="6">ЛЕДНИК</button><button data-m="7">РЕАКТОР</button><button data-m="8">КОРАБЛЬ-ПРИЗРАК</button><button data-m="9">ЛАБИРИНТ-КУБ</button></div>
-  </div>
-  <div class="opts">БОТЫ
+      </div>
+      <div class="opts">КАРТА
+        <div id="maps" class="cards"></div>
+      </div>
+      <div class="opts">БОТЫ
     <div class="row" id="botn"><button data-b="0">БЕЗ БОТОВ</button><button data-b="2">2</button><button data-b="5" class="on">5</button></div>
+        <div class="row" id="diffrow"><span class="lbl">СЛОЖНОСТЬ</span><div id="diff"><button data-d="0">НОВИЧОК</button><button data-d="1" class="on">БОЕЦ</button><button data-d="2">МАСТЕР</button></div></div>
+      </div>
+      <div id="guestnote" class="hint hidden">Карту и режим выбирает хост. Матч начнётся, когда он нажмёт «Начать».</div>
+      <div class="row"><button id="setback">&lt; НАЗАД</button><button id="start">В БОЙ</button></div>
+    </div>
+    <div class="lobbyside hidden" id="lobbyside">
+      <div class="ltitle">ИГРОКИ <span id="lcount"></span></div>
+      <div id="lplayers"></div>
+      <div id="linvbox"><button id="linv">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button><div class="hint">Код игры: <b id="lcode"></b></div></div>
+      <div class="ltitle" style="margin-top:14px">ЧАТ</div>
+      <div id="lchat"></div>
+      <input id="lchatin" maxlength="100" autocomplete="off" placeholder="Сообщение, Enter — отправить">
+      <details id="turnbox"><summary>Дополнительно: ретранслятор</summary>
+        <div class="hint">Нужен, если друг в другой сети и не может подключиться. Логин и пароль Metered хранятся только в этом браузере и уходят друзьям в ссылке-приглашении.</div>
+        <div class="row"><input id="tuser" placeholder="ЛОГИН" style="width:150px;font-size:9px;text-transform:none"><input id="tpass" type="password" placeholder="ПАРОЛЬ" style="width:120px;font-size:9px;text-transform:none"></div>
+      </details>
+      <div class="netmsg"></div>
+    </div>
   </div>
-  <div class="opts" id="settings">НАСТРОЙКИ
+</div>
+
+<div id="joinscr" class="overlay hidden">
+  <div class="stitle" id="jtitle">ВХОД ПО КОДУ</div>
+  <div class="hint" id="jsub" style="margin-bottom:22px">Попросите у хоста код из 4 букв или ссылку-приглашение.</div>
+  <div class="field" id="jcoderow"><label for="jcode">Код игры</label><input id="jcode" maxlength="4" autocomplete="off"></div>
+  <div class="field"><label for="jname">Ваше имя</label><input id="jname" maxlength="10" autocomplete="off"></div>
+  <div class="row"><button id="jback">&lt; НАЗАД</button><button id="join" class="big">ВОЙТИ</button></div>
+  <div class="netmsg"></div>
+</div>
+
+<div id="setdlg" class="overlay hidden"><div class="dlg"><div class="stitle">НАСТРОЙКИ</div><div id="setdlgbody"><div class="opts" id="settings">НАСТРОЙКИ
     <div class="row"><label>МЫШЬ <input type="range" id="s_sens" min="0.2" max="3" step="0.05"><span id="v_sens"></span></label><label>ОБЗОР <input type="range" id="s_fov" min="60" max="110" step="1"><span id="v_fov"></span></label><label>ГРОМКОСТЬ <input type="range" id="s_vol" min="0" max="100" step="5"><span id="v_vol"></span></label><button id="s_inv"></button></div>
-  </div>
-  <button id="start">В БОЙ</button>
-  <div class="opts" style="margin-top:30px">ИГРА ПО СЕТИ
-    <div class="row"><input id="pname" maxlength="10" placeholder="ИМЯ" value="Игрок"><button id="host">СОЗДАТЬ ИГРУ</button></div>
-    <div class="row"><input id="jcode" maxlength="4" placeholder="КОД"><button id="join">ПОДКЛЮЧИТЬСЯ</button></div>
-    <div class="row" id="turnrow" style="font-size:9px;color:#888;align-items:center">РЕТРАНСЛЯТОР METERED:<input id="tuser" placeholder="ЛОГИН" style="width:150px;font-size:9px;text-transform:none"><input id="tpass" type="password" placeholder="ПАРОЛЬ" style="width:120px;font-size:9px;text-transform:none"></div>
-    <div id="netstatus"></div>
-  </div>
+  </div></div><button class="dlgclose">ГОТОВО</button></div></div>
+<div id="helpdlg" class="overlay hidden"><div class="dlg"><div class="stitle">УПРАВЛЕНИЕ</div>
   <div class="help">
     <b>WASD</b> — бег · <b>ПРОБЕЛ</b> — прыжок · <b>двойное нажатие WASD</b> — уклонение<br>
     <b>ЛКМ</b> — огонь · <b>ПКМ</b> — альтернативный · <b>1–7 / колесо</b> — оружие · <b>TAB</b> — таблица<br>
-    <b>T / ENTER</b> — чат · <b>P</b> — 3DFX · <b>F12</b> — скриншот · <b>L</b> — фильтр · <b>R</b> — разрешение · <b>M</b> — звук<br>
+    <b>T / ENTER</b> — чат · <b>E</b> — рубильник на Реакторе · <b>ESC</b> — пауза<br>
+    <b>P</b> — 3DFX · <b>F12</b> — скриншот · <b>L</b> — фильтр · <b>R</b> — разрешение · <b>M</b> — звук<br>
     до 20 фрагов или 10 минут · ракета под ноги = прыжок на ракете
-  </div>
-</div>
+  </div><button class="dlgclose">ПОНЯТНО</button></div></div>
+
 <div id="pause" class="overlay hidden"><h1 id="pausetitle" style="font-size:40px">ПАУЗА</h1><div id="pausehint" class="sub">КЛИК — ПРОДОЛЖИТЬ</div><div id="pausenet" class="sub" style="color:#9fd4ff"></div><button id="copyinv" class="hidden">СКОПИРОВАТЬ ПРИГЛАШЕНИЕ</button></div>
 <div id="end" class="overlay hidden"><div id="endtitle"></div><div id="endboard" class="board"></div><div class="row" style="margin-top:28px"><button class="big" id="again">ЕЩЁ РАЗ</button><button class="big" id="tomenu">В МЕНЮ</button></div></div>
 
@@ -983,10 +1039,11 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const MODE_WEAPON={insta:3,rocket:2},modeWeapon=()=>MODE_WEAPON[gameMode];
 const MODE_NAMES={ffa:'КАЖДЫЙ ЗА СЕБЯ',team:'КОМАНДНЫЙ БОЙ',insta:'ИНСТАГИБ',rocket:'РАКЕТНАЯ АРЕНА'},MODE_ANN={ffa:'В БОЙ!',team:'КРАСНЫЕ ПРОТИВ СИНИХ!',insta:'ИНСТАГИБ! ОДИН ВЫСТРЕЛ — ОДИН ФРАГ',rocket:'РАКЕТНАЯ АРЕНА!'};
 function turnCreds(){const u=$('tuser').value.trim(),p=$('tpass').value.trim();return u&&p?{u,p}:null;}
+function myName(){return($('pname').value||'Игрок').trim().slice(0,10)||'Игрок';}
 function saveNetPrefs(){LS.set('predel.name',$('pname').value);LS.set('predel.tu',$('tuser').value.trim());LS.set('predel.tp',$('tpass').value.trim());}
 function peerOpts(){const ice=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478','stun:stun.relay.metered.ca:80']}];const t=turnCreds();if(t)ice.push({urls:TURN_URLS,username:t.u,credential:t.p});return{config:{iceServers:ice}};}
-function inviteLink(){const t=turnCreds();let h='join='+NET.code;if(t)h+='&tu='+encodeURIComponent(t.u)+'&tp='+encodeURIComponent(t.p);return location.origin+location.pathname+'#'+h;}
-async function copyInvite(){const l=inviteLink();try{await navigator.clipboard.writeText(l);pickMsg('ПРИГЛАШЕНИЕ СКОПИРОВАНО');$('copyinv').textContent='СКОПИРОВАНО ✓';}catch(e){prompt('Скопируйте ссылку-приглашение:',l);}setTimeout(()=>{$('copyinv').textContent='СКОПИРОВАТЬ ПРИГЛАШЕНИЕ';},2000);}
+function inviteLink(){const t=turnCreds();let h='join='+NET.code+'&h='+encodeURIComponent(myName());if(t)h+='&tu='+encodeURIComponent(t.u)+'&tp='+encodeURIComponent(t.p);return location.origin+location.pathname+'#'+h;}
+async function copyInvite(){const l=inviteLink();try{await navigator.clipboard.writeText(l);pickMsg('ПРИГЛАШЕНИЕ СКОПИРОВАНО');for(const id of ['copyinv','linv'])$(id).textContent='СКОПИРОВАНО ✓';}catch(e){prompt('Скопируйте ссылку-приглашение:',l);}setTimeout(()=>{for(const id of ['copyinv','linv'])$(id).textContent='СКОПИРОВАТЬ ПРИГЛАШЕНИЕ';},2000);}
 const NET={mode:'off',peer:null,conns:[],dc:null,code:'',sendT:0,nidSeq:1,byNid:new Map(),myNid:0,projSeq:1};
 const HUMAN_COLORS=[0x40e0e0,0xff80c0,0xa0ff60,0xff9040,0xb0a0ff];
 function assignNid(e){e.nid=NET.nidSeq++;NET.byNid.set(e.nid,e);}
@@ -1005,19 +1062,20 @@ function assignBalancedTeam(e){
   e.team=gameMode==='team'?(counts[0]<=counts[1]?0:1):null;applyTeamAppearance(e);
 }
 function roster(){return ents.map(e=>({n:e.nid,nm:e.name,c:e.color,b:!!e.isBot,t:e.team}));}
-function netStatus(t,err){const el=$('netstatus');el.textContent=t;el.className=err?'err':'';}
+function netStatus(t,err){document.querySelectorAll('.netmsg').forEach(el=>{el.textContent=t;el.classList.toggle('err',!!err);});}
 function randCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=A[(Math.random()*A.length)|0];return c;}
 function updateNetInfo(){let t='';if(isHost())t=`КОД ИГРЫ: ${NET.code}<br>ИГРОКОВ: ${1+NET.conns.length}`;else if(isClient())t='СЕТЕВАЯ ИГРА';$('netinfo').innerHTML=t;$('pausenet').innerHTML=isHost()?`КОД ДЛЯ ДРУГА: ${NET.code} · ИГРА ПРОДОЛЖАЕТСЯ${turnCreds()?'':'<br><span style="color:#f96">РЕТРАНСЛЯТОР НЕ ЗАДАН — ИЗ ДРУГОЙ СЕТИ МОЖЕТ НЕ ПОДКЛЮЧИТЬСЯ</span>'}`:'';$('copyinv').classList.toggle('hidden',!isHost());}
 function hostGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
   NET.code=code||randCode();netStatus('СОЗДАЁМ ИГРУ…');
   saveNetPrefs();const peer=new Peer('predel-'+NET.code,peerOpts());NET.peer=peer;
-  peer.on('open',()=>{NET.mode='host';player.name=($('pname').value||'Игрок').slice(0,10);startMatch();updateNetInfo();netStatus('');introInvitePause=true;});
+  peer.on('open',()=>{NET.mode='host';player.name=myName();netStatus('');enterLobby();});
   peer.on('connection',dc=>{dc.on('open',()=>{const c={dc,q:[],ent:null};dc.on('data',d=>onHostData(c,d));dc.on('close',()=>dropConn(c));dc.on('error',()=>dropConn(c));});});
-  peer.on('error',err=>{if(err.type==='unavailable-id'){peer.destroy();hostGame();}else{netStatus('ОШИБКА СЕТИ: '+err.type,true);}});}
+  peer.on('error',err=>{if(err.type==='unavailable-id'){peer.destroy();hostGame();}else{netStatus('Не удалось создать игру: '+err.type+'. Проверьте интернет и попробуйте ещё раз.',true);}});}
 function onHostData(c,d){const e=c.ent;
   if(d.t==='hello'){if(c.ent)return;const used=new Set(ents.map(x=>x.color));const col=HUMAN_COLORS.find(x=>!used.has(x))||0xffffff;
-    const ne=makeEntity(String(d.name||'Друг').slice(0,10),col,false);ne.remote=true;ne.conn=c;ne.mesh=makeBotMesh(col);assignNid(ne);c.ent=ne;NET.conns.push(c);
+    const ne=makeEntity(String(d.name||'Друг').slice(0,10),col,false);ne.remote=true;ne.conn=c;ne.mesh=makeBotMesh(col);ne.mesh.group.visible=false;assignNid(ne);c.ent=ne;NET.conns.push(c);
+    if(state==='menu'||state==='end'){lobbyLog(`${nm(ne)} <span class="w">присоединился</span>`);broadcastLobby();return;}
     ents.splice(1+NET.conns.length-1,0,ne);assignBalancedTeam(ne);spawnEntity(ne);
     c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:state==='intro',nid:ne.nid,roster:roster(),mt:matchTime,br:BRIDGES.map(b=>b.broken?1:0),rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});nev({t:'roster',r:roster()},ne);
     feed(`${nm(ne)} <span class="w">присоединился</span>`);updateNetInfo();return;}
@@ -1030,22 +1088,22 @@ function onHostData(c,d){const e=c.ent;
   else if(d.t==='po'&&typeof d.c==='number')e.ping=Math.max(0,Math.round(performance.now()-d.c));}
 function dropConn(c){const i=NET.conns.indexOf(c);if(i<0)return;NET.conns.splice(i,1);const e=c.ent;
   if(e){const k=ents.indexOf(e);if(k>=0)ents.splice(k,1);scene.remove(e.mesh.group);NET.byNid.delete(e.nid);feed(`${nm(e)} <span class="w">покинул игру</span>`);nev({t:'roster',r:roster()});}
-  updateNetInfo();}
+  updateNetInfo();if(isHost()&&(state==='menu'||state==='end')){if(e)lobbyLog(`${nm(e)} <span class="w">вышел</span>`);broadcastLobby();}}
 function netShutdown(){for(const c of [...NET.conns]){try{c.dc.close();}catch(e){}dropConn(c);}if(NET.peer){try{NET.peer.destroy();}catch(e){}}NET.peer=null;NET.mode='off';updateNetInfo();}
 function snapFor(c){return{t:'s',mt:r2(matchTime),gm:gameMode,ts:teamScores.slice(),e:ents.map(x=>[x.nid,r2(x.pos.x),r2(x.pos.y),r2(x.pos.z),r2(x.yaw),r2(x.pitch),x.alive?1:0,x.weapon,r2(x.vel.x),r2(x.vel.y),r2(x.vel.z),x.frags,x.deaths,Math.ceil(x.health),Math.ceil(x.armor),x.sseq,x.hurtT>0?1:0,x.grounded?1:0,r2(x.doubleT||0),r2(x.invisT||0),r2(x.speedT||0),r2(x.shieldT||0),r2(x.jetT||0),r2(x.regenT||0),r2(x.invisFlickerT||0)]),
   pk:PICKUPS.map(p=>p.active?1:0).join(''),pg:NET.conns.filter(x=>x.ent).map(x=>[x.ent.nid,x.ent.ping==null?-1:x.ent.ping]),am:c.ent.ammo,ow:c.ent.owned,ev:c.q,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null};}
-function netTick(dt){NET.pingT=(NET.pingT||0)-dt;if(NET.pingT<=0){NET.pingT=2;const now=performance.now();for(const c of NET.conns){try{c.dc.send({t:'pi',c:now});}catch(e){}}}NET.sendT-=dt;if(NET.sendT>0)return;NET.sendT=.05;for(const c of NET.conns){if(!c.ent)continue;try{c.dc.send(snapFor(c));}catch(e){}c.q=[];}}
+function netTick(dt){NET.pingT=(NET.pingT||0)-dt;if(NET.pingT<=0){NET.pingT=2;const now=performance.now();for(const c of NET.conns){try{c.dc.send({t:'pi',c:now});}catch(e){}}}if(state==='menu'){NET.lobbyT=(NET.lobbyT||0)-dt;if(NET.lobbyT<=0){NET.lobbyT=2;broadcastLobby();}return;}NET.sendT-=dt;if(NET.sendT>0)return;NET.sendT=.05;for(const c of NET.conns){if(!c.ent)continue;try{c.dc.send(snapFor(c));}catch(e){}c.q=[];}}
 /* client */
 function joinGame(code){
   if(!window.Peer){netStatus('PeerJS не загрузился — нет интернета?',true);return;}
-  code=String(code||'').toUpperCase().trim();if(code.length!==4){netStatus('ВВЕДИТЕ КОД ИЗ 4 БУКВ',true);return;}
-  initAudio();netStatus('ПОДКЛЮЧЕНИЕ…');saveNetPrefs();const peer=new Peer(peerOpts());NET.peer=peer;
+  code=String(code||'').toUpperCase().trim();if(code.length!==4){netStatus('Код игры — 4 буквы, например QZ7K.',true);return;}if(NET.peer){try{NET.peer.destroy();}catch(e){}NET.peer=null;}
+  initAudio();netStatus('Подключаемся…');saveNetPrefs();const peer=new Peer(peerOpts());NET.peer=peer;
   peer.on('open',()=>{const dc=peer.connect('predel-'+code,{reliable:true,serialization:'json'});NET.dc=dc;
-    const to=setTimeout(()=>{if(!isClient())netStatus('ИГРА НАЙДЕНА, НО СЕТЬ БЛОКИРУЕТ ПРЯМОЕ СОЕДИНЕНИЕ. НУЖЕН TURN-СЕРВЕР ИЛИ ДРУГАЯ СЕТЬ',true);},12000);
-    dc.on('open',()=>{clearTimeout(to);dc.send({t:'hello',name:$('pname').value||'Друг'});});
+    const to=setTimeout(()=>{if(!isClient())netStatus('Игра найдена, но сеть не даёт соединиться напрямую. Попросите у хоста свежую ссылку-приглашение (в ней есть ретранслятор) или попробуйте другую сеть.',true);},12000);
+    dc.on('open',()=>{clearTimeout(to);dc.send({t:'hello',name:myName()});});
     dc.on('data',onClientData);
-    dc.on('close',()=>{if(isClient()){alert('Соединение с хостом потеряно');location.reload();}});});
-  peer.on('error',err=>{netStatus(err.type==='peer-unavailable'?'ИГРА С ТАКИМ КОДОМ НЕ НАЙДЕНА':'ОШИБКА СЕТИ: '+err.type,true);});}
+    dc.on('close',()=>{if(isClient()){alert('Хост закрыл игру или связь пропала.');location.reload();}});});
+  peer.on('error',err=>{netStatus(err.type==='peer-unavailable'?'Игра с таким кодом не найдена. Проверьте код и что хост ещё в игре.':'Не удалось подключиться ('+err.type+'). Попробуйте ещё раз.',true);});}
 function netSend(o){if(NET.dc&&NET.dc.open){try{NET.dc.send(o);}catch(e){}}}
 function applyRoster(r){const keep=new Set();const list=[];
   for(const it of r){keep.add(it.n);let e;
@@ -1058,11 +1116,13 @@ const cprojs=[];
 function clearCProjs(){for(const p of cprojs)scene.remove(p.mesh);cprojs.length=0;}
 function onClientData(d){
   if(d.t==='init'){if(curMap!==d.map)loadMap(d.map);NET.mode='client';if(d.br)for(let i=0;i<d.br.length;i++)setBridgeState(i,!!d.br[i]);gameMode=d.mode||'ffa';teamScores=d.teamScores||[0,0];if(d.rt!=null)REACTOR.timer=d.rt;if(d.rd!=null)setReactorDark(!!d.rd,false);if(d.st!=null)SHIP.timer=d.st;if(d.swv!=null)SHIP.waveT=d.swv;if(d.swi!=null)SHIP.waveId=d.swi;netStatus('');NET.myNid=d.nid;
-    for(const b of bots){b.alive=false;b.mesh.group.visible=false;}NET.byNid.clear();applyRoster(d.roster);clearCProjs();
+    for(const b of bots){b.alive=false;b.mesh.group.visible=false;}for(const x of NET.byNid.values())if(x!==player&&!bots.includes(x)&&x.mesh)scene.remove(x.mesh.group);NET.byNid.clear();applyRoster(d.roster);clearCProjs();
     matchTime=d.mt;firstBlood=true;state=d.intro?'intro':'play';introT=d.intro?3.2:0;player.alive=false;player.sseq=-1;
-    $('menu').classList.add('hidden');$('end').classList.add('hidden');$('hud').style.display=d.intro?'none':'block';$('feed').innerHTML='';feedList.length=0;showIntroCard(d.intro);startMusic('battle');
+    hideScreens();$('end').classList.add('hidden');$('hud').style.display=d.intro?'none':'block';$('feed').innerHTML='';feedList.length=0;showIntroCard(d.intro);startMusic('battle');
     updateNetInfo();if(!d.intro)requestLock();announce(MODE_ANN[gameMode]||'В БОЙ!');return;}
   if(d.t==='pi'){netSend({t:'po',c:d.c});return;}
+  if(d.t==='lobby'){clientLobby(d);return;}
+  if(d.t==='lc'){lobbyLog(d.h);return;}
   if(d.t!=='s'||!isClient())return;
   if(d.pg)for(const [n,v] of d.pg){const e=NET.byNid.get(n);if(e)e.ping=v<0?null:v;}
   for(const a of d.e){const e=NET.byNid.get(a[0]);if(!e)continue;const was=e.alive;
@@ -1104,8 +1164,8 @@ function clientEvent(v){const V=a=>new V3(a[0],a[1],a[2]);switch(v.t){
 function clientEnd(result){state='end';let title,voice;
   if(gameMode==='team'){teamScores=result.ts||teamScores;title=result.team==null?'НИЧЬЯ':result.team===player.team?'ВАША КОМАНДА ПОБЕДИЛА!':`${TEAM_NAMES[result.team]} ПОБЕДИЛИ`;voice=result.team===player.team?'Ваша команда победила':'Матч окончен';}
   else{const w=NET.byNid.get(result.w);title=w===player?'ВЫ ПОБЕДИЛИ!':w?`ПОБЕДИТЕЛЬ: ${nm(w)}`:'МАТЧ ОКОНЧЕН';voice=w===player?'Вы победили':'Матч окончен';}
-  $('endtitle').innerHTML=title;$('endboard').innerHTML=boardHTML()+'<div style="margin-top:16px;color:#888;font-size:10px">ЖДЁМ, ПОКА ХОСТ НАЧНЁТ НОВЫЙ МАТЧ…</div>';
-  $('again').classList.add('hidden');$('end').classList.remove('hidden');$('hud').style.display='none';showIntroCard(false);startMusic('lobby');speak(voice);if(document.exitPointerLock)document.exitPointerLock();}
+  $('endtitle').innerHTML=title;$('endboard').innerHTML=boardHTML()+'<div class="hint" style="margin-top:16px">Хост выбирает следующую карту…</div>';
+  $('again').classList.add('hidden');$('tomenu').textContent='ВЫЙТИ';$('end').classList.remove('hidden');$('hud').style.display='none';showIntroCard(false);startMusic('lobby');speak(voice);if(document.exitPointerLock)document.exitPointerLock();}
 function clientFire(alt=false){const w=WEAPONS[player.weapon];
   if(player.ammo[w.id]<=0){playSnd('empty');player.cd=.3;autoSwitch(player);return;}
   player.ammo[w.id]--;if(modeWeapon()!=null)player.ammo[w.id]=99;player.cd=alt?(w.altRate||w.rate):w.rate;vmKick=1;vmFlashT=.05;playSnd(w.snd);
@@ -1382,9 +1442,9 @@ function resetMatch(){for(const e of ents){e.frags=0;e.deaths=0;e.alive=false;if
   firstBlood=false;matchTime=MATCH_TIME;for(const e of ents)spawnEntity(e);}
 function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...bots.slice(0,botCount)];for(const b of bots.slice(botCount)){b.alive=false;b.mesh.group.visible=false;}assignBalancedTeams();resetMatch();state='intro';introT=3.2;showIntroCard(true);
   for(const c of NET.conns){c.q=[];try{c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:true,nid:c.ent.nid,roster:roster(),mt:matchTime,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});}catch(e){}}
-  $('menu').classList.add('hidden');$('end').classList.add('hidden');$('hud').style.display='none';$('feed').innerHTML='';feedList.length=0;
+  hideScreens();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';$('feed').innerHTML='';feedList.length=0;
   startMusic('battle');}
-function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice()}:{t:'end',w:w.nid});$('again').classList.remove('hidden');$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;$('endboard').innerHTML=boardHTML();
+function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice()}:{t:'end',w:w.nid});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;$('endboard').innerHTML=boardHTML();
   $('end').classList.remove('hidden');$('hud').style.display='none';startMusic('lobby');speak(gameMode==='team'?(teamWinner==null?'Ничья':`${TEAM_NAMES[teamWinner]} победили`):w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
 function showPause(invite){if(state!=='play')return;closeChat();state='paused';$('pause').appendChild($('settings'));mouseDown=false;mouseAltDown=false;updateNetInfo();
   $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';$('pausehint').textContent=invite?'СКОПИРУЙТЕ ПРИГЛАШЕНИЕ И ОТПРАВЬТЕ ДРУГУ · КЛИК ПО ЭКРАНУ — В БОЙ':'КЛИК — ПРОДОЛЖИТЬ';
@@ -1397,16 +1457,63 @@ document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockEl
   else if(!locked&&state==='play')showPause(false);});
 document.addEventListener('pointerlockerror',()=>{});
 $('pause').addEventListener('click',()=>{if(noLock||locked)resumeGame();else{requestLock();setTimeout(()=>{if(state==='paused'&&!locked)resumeGame();},400);}});
-$('start').addEventListener('click',()=>{netShutdown();startMatch();});
-$('host').addEventListener('click',()=>{initAudio();hostGame();});
+$('start').addEventListener('click',()=>{if(isClient())return;if(!isHost())netShutdown();startMatch();});
 $('join').addEventListener('click',()=>joinGame($('jcode').value));
 $('jcode').addEventListener('keydown',e=>{if(e.key==='Enter')joinGame($('jcode').value);});
 $('menu').addEventListener('pointerdown',()=>{if(state==='menu')startMusic('lobby');});
-document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{selectedMode=b.dataset.mode;document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on',x===b));}));
-document.querySelectorAll('#maps button').forEach(b=>b.addEventListener('click',()=>{selMap=+b.dataset.m;document.querySelectorAll('#maps button').forEach(x=>x.classList.toggle('on',x===b));if(curMap!==selMap){loadMap(selMap);for(const e of ents)spawnEntity(e);}}));
-$('tomenu').addEventListener('click',()=>{settingsToMenu();startMusic('lobby');if(isClient()){location.reload();return;}netShutdown();state='menu';ents=[...bots];player.alive=false;$('end').classList.add('hidden');$('menu').classList.remove('hidden');for(const b of bots){b.frags=b.deaths=0;spawnEntity(b);}});$('again').addEventListener('click',startMatch);
-document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',()=>{difficulty=+b.dataset.d;document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',x===b));}));
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{if(isClient())return;selectedMode=b.dataset.mode;broadcastLobbySoon();document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on',x===b));}));
+$('tomenu').addEventListener('click',()=>{if(isClient()){leaveGame();return;}if(isHost())enterLobby();else{backToSetup();}});$('again').addEventListener('click',startMatch);
+document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',()=>{if(isClient())return;difficulty=+b.dataset.d;broadcastLobbySoon();document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',x===b));}));
 
+/* ---------- screens and lobby ---------- */
+const MAP_SHORT=['БАСТИОН','ЛИТЕЙНЯ','ОРБИТА','ПОЛИГОН','ХРАМ','КРЫШИ','ЛЕДНИК','РЕАКТОР','КОРАБЛЬ','КУБ'];
+const MAP_DESC=['крепость, джамп-пады','лава и узкие мостки','низкая гравитация, бездна','маленькая, для дуэли','руины, река, мосты рушатся','ночной город, пропасть','скользкий лёд, метель','ядро пульсирует, свет гаснет','шторм, волны за борт','гравитация в каждой комнате своя'];
+const SCREENS=['menu','setup','joinscr'];let setupMode='solo';
+function hideScreens(){for(const id of SCREENS)$(id).classList.add('hidden');}
+function showScreen(id){hideScreens();$(id).classList.remove('hidden');}
+function buildMapCards(){$('maps').innerHTML=MAP_SHORT.map((n,i)=>`<button data-m="${i}"><b>${n}</b><span>${MAP_DESC[i]}</span></button>`).join('');
+  document.querySelectorAll('#maps button').forEach(b=>b.addEventListener('click',()=>{if(isClient())return;selectMap(+b.dataset.m);broadcastLobbySoon();}));syncMapCards();}
+function syncMapCards(){document.querySelectorAll('#maps button').forEach(x=>x.classList.toggle('on',+x.dataset.m===selMap));}
+function selectMap(i){selMap=i;syncMapCards();if(curMap!==selMap){loadMap(selMap);for(const e of ents)spawnEntity(e);}}
+function syncSetupButtons(){document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on',x.dataset.mode===selectedMode));document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',+x.dataset.b===botCount));document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',+x.dataset.d===difficulty));syncMapCards();updateDiffRow();}
+function updateDiffRow(){$('diffrow').style.visibility=botCount>0?'visible':'hidden';}
+function renderSetup(){const host=setupMode==='host',guest=setupMode==='guest';
+  $('setuptitle').textContent=host?'ЛОББИ · ВЫ ХОСТ':guest?'ЛОББИ':'ОДИНОЧНАЯ ИГРА';
+  $('lobbyside').classList.toggle('hidden',setupMode==='solo');$('setupmain').classList.toggle('ro',guest);$('guestnote').classList.toggle('hidden',!guest);
+  $('start').classList.toggle('hidden',guest);$('start').textContent=host?'НАЧАТЬ МАТЧ':'В БОЙ';$('setback').textContent=guest?'< ВЫЙТИ':'< НАЗАД';
+  $('linvbox').classList.toggle('hidden',!host);$('turnbox').classList.toggle('hidden',!host);$('lcode').textContent=NET.code;syncSetupButtons();}
+function lobbyPlayers(){return[{n:player.nid,nm:player.name,h:1},...NET.conns.filter(c=>c.ent).map(c=>({n:c.ent.nid,nm:c.ent.name,p:c.ent.ping==null?-1:c.ent.ping}))];}
+function renderPlayers(list,me){$('lcount').textContent=`(${list.length}/6)`;$('lplayers').innerHTML=list.map(p=>`<div class="${p.n===me?'me':''}"><span>${esc(p.nm)}${p.n===me?' · вы':''}</span><i>${p.h?'ХОСТ':p.p>=0?p.p+' МС':'…'}</i></div>`).join('');}
+function lobbyState(c){return{t:'lobby',map:selMap,mode:selectedMode,bots:botCount,diff:difficulty,code:NET.code,players:lobbyPlayers(),you:c&&c.ent?c.ent.nid:0};}
+function broadcastLobby(){if(!isHost())return;for(const c of NET.conns){if(!c.ent)continue;try{c.dc.send(lobbyState(c));}catch(e){}}if(setupMode==='host')renderPlayers(lobbyPlayers(),player.nid);}
+let lobbySoonT=0;function broadcastLobbySoon(){if(!isHost())return;clearTimeout(lobbySoonT);lobbySoonT=setTimeout(broadcastLobby,60);}
+function lobbyLog(h){const d=document.createElement('div');d.innerHTML=h;$('lchat').appendChild(d);while($('lchat').children.length>40)$('lchat').firstChild.remove();$('lchat').scrollTop=1e9;}
+function toMenuWorld(){state='menu';closeChat();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';showIntroCard(false);player.alive=false;
+  if(document.exitPointerLock&&locked)document.exitPointerLock();if(isClient()){for(const x of NET.byNid.values())if(x!==player&&!bots.includes(x)&&x.mesh)x.mesh.group.visible=false;clearCProjs();}
+  for(const e of NET.conns)if(e.ent){e.ent.alive=false;e.ent.mesh.group.visible=false;}
+  ents=[...bots];for(const b of bots){b.frags=b.deaths=0;spawnEntity(b);}startMusic('lobby');}
+function enterLobby(){toMenuWorld();setupMode='host';$('lchat').innerHTML='';lobbyLog('<span class="w">Игра создана. Скопируйте приглашение и отправьте друзьям.</span>');renderSetup();showScreen('setup');broadcastLobby();}
+function backToSetup(){toMenuWorld();setupMode='solo';renderSetup();showScreen('setup');}
+function clientLobby(d){NET.mode='client';NET.myNid=d.you||NET.myNid;player.nid=NET.myNid;if(state!=='menu')toMenuWorld();
+  if(setupMode!=='guest'){setupMode='guest';netStatus('');$('lchat').innerHTML='';lobbyLog('<span class="w">Вы в лобби. Ждём, пока хост начнёт матч.</span>');}
+  NET.code=d.code;selectedMode=d.mode;botCount=d.bots;difficulty=d.diff;if(selMap!==d.map||curMap!==d.map)selectMap(d.map);renderSetup();renderPlayers(d.players,NET.myNid);if($('setup').classList.contains('hidden'))showScreen('setup');}
+function leaveGame(){location.href=location.pathname;}
+function showInvite(hostName){$('jtitle').textContent='ВАС ЗОВУТ В ИГРУ';$('jsub').textContent=(hostName?hostName+' зовёт вас в ПРЕДЕЛ.':'Вас позвали в ПРЕДЕЛ.')+' Введите имя и нажмите «Войти».';$('jcoderow').classList.add('hidden');$('jname').value=$('pname').value;showScreen('joinscr');setTimeout(()=>$('jname').focus(),50);}
+$('m_solo').addEventListener('click',()=>{initAudio();netShutdown();setupMode='solo';renderSetup();showScreen('setup');});
+$('m_host').addEventListener('click',()=>{initAudio();if(isHost()){enterLobby();return;}hostGame();});
+$('m_join').addEventListener('click',()=>{$('jtitle').textContent='ВХОД ПО КОДУ';$('jsub').textContent='Попросите у хоста код из 4 букв или ссылку-приглашение.';$('jcoderow').classList.remove('hidden');$('jname').value=$('pname').value;netStatus('');showScreen('joinscr');setTimeout(()=>$('jcode').focus(),50);});
+$('jback').addEventListener('click',()=>{if(NET.peer&&!isHost()){try{NET.peer.destroy();}catch(e){}NET.peer=null;}netStatus('');showScreen('menu');});
+$('jname').addEventListener('input',()=>{$('pname').value=$('jname').value;LS.set('predel.name',$('pname').value);});
+$('jname').addEventListener('keydown',e=>{if(e.key==='Enter')joinGame($('jcode').value);});
+$('pname').addEventListener('change',()=>{LS.set('predel.name',$('pname').value);player.name=myName();});
+$('setback').addEventListener('click',()=>{if(setupMode==='guest'){leaveGame();return;}if(setupMode==='host'){if(NET.conns.length&&!confirm('Закрыть игру? Все игроки отключатся.'))return;netShutdown();}setupMode='solo';netStatus('');showScreen('menu');});
+$('linv').addEventListener('click',copyInvite);
+$('lchatin').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){const m=e.target.value;e.target.value='';if(m.trim())sendChat(m);}});
+$('m_set').addEventListener('click',()=>{$('setdlgbody').appendChild($('settings'));$('setdlg').classList.remove('hidden');});
+$('m_help').addEventListener('click',()=>$('helpdlg').classList.remove('hidden'));
+document.querySelectorAll('.dlgclose').forEach(b=>b.addEventListener('click',()=>b.closest('.overlay').classList.add('hidden')));
+for(const id of ['tuser','tpass'])$(id).addEventListener('change',saveNetPrefs);
+buildMapCards();updateDiffRow();
 /* ---------- settings ---------- */
 function syncSettingsUI(){$('s_sens').value=SET.sens;$('v_sens').textContent=SET.sens.toFixed(2);$('s_fov').value=SET.fov;$('v_fov').textContent=SET.fov+'°';$('s_vol').value=SET.vol;$('v_vol').textContent=SET.vol+'%';$('s_inv').textContent='ИНВЕРСИЯ: '+(SET.inv?'ВКЛ':'ВЫКЛ');$('s_inv').classList.toggle('on',SET.inv);}
 function saveSettings(){LS.set('predel.sens',SET.sens);LS.set('predel.fov',SET.fov);LS.set('predel.vol',SET.vol);LS.set('predel.inv',SET.inv?'1':'0');if(master)master.gain.value=SET.vol/160;syncSettingsUI();}
@@ -1417,12 +1524,12 @@ $('s_vol').addEventListener('change',()=>{initAudio();playSnd('pickup');});
 $('s_inv').addEventListener('click',()=>{SET.inv=!SET.inv;saveSettings();});
 for(const ev of ['click','mousedown'])$('settings').addEventListener(ev,e=>e.stopPropagation());
 syncSettingsUI();
-function settingsToMenu(){$('menu').insertBefore($('settings'),$('start'));}
+function settingsToMenu(){$('setdlgbody').appendChild($('settings'));}
 /* ---------- chat ---------- */
 let chatOpen=false;
 function openChat(){chatOpen=true;for(const k in keys)keys[k]=false;mouseDown=false;mouseAltDown=false;const c=$('chatin');c.value='';c.classList.remove('hidden');c.focus();}
 function closeChat(){if(!chatOpen)return;chatOpen=false;const c=$('chatin');c.classList.add('hidden');c.blur();}
-function postChat(e,m){m=String(m||'').replace(/\s+/g,' ').trim().slice(0,100);if(!m||!e)return;feed(`${nm(e)}: <span class="chat">${esc(m)}</span>`,12);playSnd('switch');}
+function postChat(e,m){m=String(m||'').replace(/\s+/g,' ').trim().slice(0,100);if(!m||!e)return;if(state==='menu'||state==='end'){const h=`${nm(e)}: <span class="chat">${esc(m)}</span>`;lobbyLog(h);for(const c of NET.conns){try{c.dc.send({t:'lc',h});}catch(x){}}if(state==='menu')return;}feed(`${nm(e)}: <span class="chat">${esc(m)}</span>`,12);playSnd('switch');}
 function sendChat(m){if(isClient())netSend({t:'chat',m:String(m).slice(0,100)});else postChat(player,m);}
 $('chatin').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){const m=e.target.value;closeChat();if(m.trim())sendChat(m);}else if(e.key==='Escape'){closeChat();}});
 $('chatin').addEventListener('blur',()=>{if(chatOpen)setTimeout(closeChat,0);});
@@ -1481,15 +1588,15 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
 
 loadMap(0);
 for(const b of bots)spawnEntity(b);
-document.querySelectorAll('#botn button').forEach(b=>b.addEventListener('click',()=>{botCount=+b.dataset.b;LS.set('predel.bots',String(botCount));document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',x===b));}));
+document.querySelectorAll('#botn button').forEach(b=>b.addEventListener('click',()=>{if(isClient())return;botCount=+b.dataset.b;updateDiffRow();broadcastLobbySoon();LS.set('predel.bots',String(botCount));document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',x===b));}));
 {const sb=LS.get('predel.bots');if(sb!==''){botCount=+sb;document.querySelectorAll('#botn button').forEach(x=>x.classList.toggle('on',+x.dataset.b===botCount));}}
 $('copyinv').addEventListener('click',e=>{e.stopPropagation();copyInvite();});
 $('pname').value=LS.get('predel.name')||'Игрок';$('tuser').value=LS.get('predel.tu');$('tpass').value=LS.get('predel.tp');
 if(location.hash.length>1){const h=new URLSearchParams(location.hash.slice(1));
   if(h.get('tu')&&h.get('tp')){$('tuser').value=h.get('tu');$('tpass').value=h.get('tp');}
-  if(h.get('join')){$('jcode').value=h.get('join').toUpperCase();if(!LS.get('predel.name'))$('pname').value='Друг';netStatus('ВАС ПРИГЛАСИЛИ В ИГРУ '+$('jcode').value+' — ВВЕДИТЕ ИМЯ И НАЖМИТЕ «ПОДКЛЮЧИТЬСЯ»');}
+  if(h.get('join')){$('jcode').value=h.get('join').toUpperCase();if(!LS.get('predel.name'))$('pname').value='';showInvite(h.get('h'));}
   history.replaceState(null,'',location.pathname+location.search);}
-{const q=new URLSearchParams(location.search);if(q.get('name'))$('pname').value=q.get('name');if(q.get('host'))setTimeout(()=>hostGame(q.get('host').toUpperCase()),500);if(q.get('join')){$('jcode').value=q.get('join');setTimeout(()=>joinGame(q.get("join")),3500);}}
+{const q=new URLSearchParams(location.search);if(q.get('name')){$('pname').value=q.get('name');$('jname').value=q.get('name');}if(q.get('host'))setTimeout(()=>hostGame(q.get('host').toUpperCase()),500);if(q.get('join')){$('jcode').value=q.get('join');setTimeout(()=>joinGame(q.get("join")),3500);}}
 requestAnimationFrame(frame);
 </script>
 </body>
