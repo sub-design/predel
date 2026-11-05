@@ -137,7 +137,7 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
     <div class="setupmain" id="setupmain">
       <div class="stitle" id="setuptitle">ОДИНОЧНАЯ ИГРА</div>
       <div class="opts">РЕЖИМ
-    <div class="row" id="mode"><button data-mode="ffa" class="on">КАЖДЫЙ ЗА СЕБЯ</button><button data-mode="team">КОМАНДНЫЙ БОЙ</button><button data-mode="insta">ИНСТАГИБ</button><button data-mode="rocket">РАКЕТНАЯ АРЕНА</button><button data-mode="koth">КОРОЛЬ ГОРЫ</button><button data-mode="lms">ВЫЖИВШИЙ</button><button data-mode="duel">ДУЭЛЬ</button></div>
+    <div class="row" id="mode"><button data-mode="ffa" class="on">КАЖДЫЙ ЗА СЕБЯ</button><button data-mode="team">КОМАНДНЫЙ БОЙ</button><button data-mode="insta">ИНСТАГИБ</button><button data-mode="rocket">РАКЕТНАЯ АРЕНА</button><button data-mode="koth">КОРОЛЬ ГОРЫ</button><button data-mode="lms">ВЫЖИВШИЙ</button><button data-mode="duel">ДУЭЛЬ</button><button data-mode="ctf">ЗАХВАТ ФЛАГА</button></div>
     <div id="modehint" class="hint"></div>
       </div>
       <div class="opts">КАРТА
@@ -199,11 +199,12 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 'use strict';
 const V3=THREE.Vector3,UP=new V3(0,1,0);
 const G=26,JUMP=9.5,A=36,FRAG_LIMIT=20,MATCH_TIME=600;
+function isTeam(){return gameMode==='team'||gameMode==='ctf';}
 const TEAM_NAMES=['КРАСНЫЕ','СИНИЕ'],TEAM_COLORS=[0xe34e4e,0x508bff];
 const POWERUPS={double:{field:'doubleT',duration:20,label:'ДВОЙНОЙ УРОН · 20 СЕК',color:0xff4030},invis:{field:'invisT',duration:15,label:'НЕВИДИМОСТЬ · 15 СЕК',color:0xb080ff},speed:{field:'speedT',duration:15,label:'УСКОРЕНИЕ · 15 СЕК',color:0x40e080},shield:{field:'shieldT',duration:12,label:'ЩИТ-ОТРАЖАТЕЛЬ · 12 СЕК',color:0x40cfff},jet:{field:'jetT',duration:10,label:'РЕАКТИВНЫЙ РАНЕЦ · 10 СЕК',color:0xffb040},regen:{field:'regenT',duration:15,label:'РЕГЕНЕРАЦИЯ · 15 СЕК',color:0xff70a0}};
 let gameMode='ffa',selectedMode='ffa',teamScores=[0,0];
-const sameTeam=(a,b)=>gameMode==='team'&&a!==b&&a&&b&&a.team!=null&&a.team===b.team;
-const teamColorFor=e=>gameMode==='team'&&e.team!=null?TEAM_COLORS[e.team]:e.color;
+const sameTeam=(a,b)=>isTeam()&&a!==b&&a&&b&&a.team!=null&&a.team===b.team;
+const teamColorFor=e=>isTeam()&&e.team!=null?TEAM_COLORS[e.team]:e.color;
 let seed=1337;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
 const R=Math.random,clamp=(v,a,b)=>v<a?a:v>b?b:v,$=id=>document.getElementById(id);
 const a3=v=>[v.x,v.y,v.z];
@@ -1166,9 +1167,9 @@ const LS={get(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}},se
 const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1'};
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE_WEAPON={insta:3,rocket:2},modeWeapon=()=>MODE_WEAPON[gameMode];
-const MODE_LIMIT={duel:10,koth:60,lms:9999},fragLimit=()=>MODE_LIMIT[gameMode]||FRAG_LIMIT,LMS_LIVES=3;
-const MODE_HINT={ffa:'Все против всех, до 20 фрагов.',team:'Красные против синих, общий счёт до 20.',insta:'Только Игла, одно попадание — фраг.',rocket:'Только ракеты, урон по себе отключён.',koth:'Стойте в зоне в одиночку — каждую секунду +1 очко. До 60 очков.',lms:'У каждого 3 жизни. Побеждает последний оставшийся.',duel:'Один на один до 10 фрагов.'};
-const MODE_NAMES={ffa:'КАЖДЫЙ ЗА СЕБЯ',team:'КОМАНДНЫЙ БОЙ',insta:'ИНСТАГИБ',rocket:'РАКЕТНАЯ АРЕНА',koth:'КОРОЛЬ ГОРЫ',lms:'ПОСЛЕДНИЙ ВЫЖИВШИЙ',duel:'ДУЭЛЬ'},MODE_ANN={koth:'ЗАЙМИ ВЫСОТУ!',lms:'ТРИ ЖИЗНИ. ВЫЖИВИ!',duel:'ДУЭЛЬ! ДО 10 ФРАГОВ',ffa:'В БОЙ!',team:'КРАСНЫЕ ПРОТИВ СИНИХ!',insta:'ИНСТАГИБ! ОДИН ВЫСТРЕЛ — ОДИН ФРАГ',rocket:'РАКЕТНАЯ АРЕНА!'};
+const MODE_LIMIT={duel:10,koth:60,lms:9999,ctf:3},fragLimit=()=>MODE_LIMIT[gameMode]||FRAG_LIMIT,LMS_LIVES=3;
+const MODE_HINT={ffa:'Все против всех, до 20 фрагов.',team:'Красные против синих, общий счёт до 20.',insta:'Только Игла, одно попадание — фраг.',rocket:'Только ракеты, урон по себе отключён.',koth:'Стойте в зоне в одиночку — каждую секунду +1 очко. До 60 очков.',lms:'У каждого 3 жизни. Побеждает последний оставшийся.',duel:'Один на один до 10 фрагов.',ctf:'Красные против синих. Принесите чужой флаг на свою базу, пока ваш на месте. До 3 захватов.'};
+const MODE_NAMES={ffa:'КАЖДЫЙ ЗА СЕБЯ',team:'КОМАНДНЫЙ БОЙ',insta:'ИНСТАГИБ',rocket:'РАКЕТНАЯ АРЕНА',koth:'КОРОЛЬ ГОРЫ',lms:'ПОСЛЕДНИЙ ВЫЖИВШИЙ',duel:'ДУЭЛЬ',ctf:'ЗАХВАТ ФЛАГА'},MODE_ANN={ctf:'ЗАХВАТИ ФЛАГ!',koth:'ЗАЙМИ ВЫСОТУ!',lms:'ТРИ ЖИЗНИ. ВЫЖИВИ!',duel:'ДУЭЛЬ! ДО 10 ФРАГОВ',ffa:'В БОЙ!',team:'КРАСНЫЕ ПРОТИВ СИНИХ!',insta:'ИНСТАГИБ! ОДИН ВЫСТРЕЛ — ОДИН ФРАГ',rocket:'РАКЕТНАЯ АРЕНА!'};
 function turnCreds(){const u=$('tuser').value.trim(),p=$('tpass').value.trim();return u&&p?{u,p}:null;}
 function myName(){return($('pname').value||'Игрок').trim().slice(0,10)||'Игрок';}
 function saveNetPrefs(){LS.set('predel.name',$('pname').value);LS.set('predel.tu',$('tuser').value.trim());LS.set('predel.tp',$('tpass').value.trim());}
@@ -1188,11 +1189,11 @@ function kick(e,v){if(e.remote)sendTo(e,{t:'k',v:a3r(v)});else{e.vel.add(v);}}
 const r2=x=>Math.round(x*100)/100;const a3r=v=>[r2(v.x),r2(v.y),r2(v.z)];
 function assignBalancedTeams(){
   const counts=[0,0];
-  for(const e of ents){const t=gameMode==='team'?(counts[0]<=counts[1]?0:1):null;e.team=t;if(e.isBot)e.target=null;if(t!=null)counts[t]++;applyTeamAppearance(e);}
+  for(const e of ents){const t=isTeam()?(counts[0]<=counts[1]?0:1):null;e.team=t;if(e.isBot)e.target=null;if(t!=null)counts[t]++;applyTeamAppearance(e);}
 }
 function assignBalancedTeam(e){
   const counts=[0,0];for(const x of ents)if(x!==e&&x.team!=null)counts[x.team]++;
-  e.team=gameMode==='team'?(counts[0]<=counts[1]?0:1):null;applyTeamAppearance(e);
+  e.team=isTeam()?(counts[0]<=counts[1]?0:1):null;applyTeamAppearance(e);
 }
 function roster(){return ents.map(e=>({n:e.nid,nm:e.name,c:e.color,b:!!e.isBot,t:e.team}));}
 function netStatus(t,err){document.querySelectorAll('.netmsg').forEach(el=>{el.textContent=t;el.classList.toggle('err',!!err);});}
@@ -1235,7 +1236,7 @@ function dropConn(c){const i=NET.conns.indexOf(c);if(i<0)return;NET.conns.splice
   updateNetInfo();if(isHost()&&(state==='menu'||state==='end')){if(e)lobbyLog(`${nm(e)} <span class="w">вышел</span>`);broadcastLobby();}}
 function netShutdown(){NET.closing=true;const old=[...NET.conns],peer=NET.peer;for(const c of old){try{if(isHost())c.dc.send({t:'hostbye'});}catch(e){}dropConn(c);}for(const g of [...NET.ghosts])dropGhost(g);NET.closing=false;NET.peer=null;NET.mode='off';updateNetInfo();
   setTimeout(()=>{for(const c of old){try{c.dc.close();}catch(e){}}if(peer){try{peer.destroy();}catch(e){}}},250);}
-function snapFor(c){return{t:'s',ht:Math.round(performance.now())/1000,mt:r2(matchTime),gm:gameMode,ts:teamScores.slice(),e:ents.map(x=>[x.nid,r2(x.pos.x),r2(x.pos.y),r2(x.pos.z),r2(x.yaw),r2(x.pitch),x.alive?1:0,x.weapon,r2(x.vel.x),r2(x.vel.y),r2(x.vel.z),x.frags,x.deaths,Math.ceil(x.health),Math.ceil(x.armor),x.sseq,x.hurtT>0?1:0,x.grounded?1:0,r2(x.doubleT||0),r2(x.invisT||0),r2(x.speedT||0),r2(x.shieldT||0),r2(x.jetT||0),r2(x.regenT||0),r2(x.invisFlickerT||0),x.lives==null?-1:x.lives]),hh:hillHolder,
+function snapFor(c){return{t:'s',ht:Math.round(performance.now())/1000,mt:r2(matchTime),gm:gameMode,ts:teamScores.slice(),e:ents.map(x=>[x.nid,r2(x.pos.x),r2(x.pos.y),r2(x.pos.z),r2(x.yaw),r2(x.pitch),x.alive?1:0,x.weapon,r2(x.vel.x),r2(x.vel.y),r2(x.vel.z),x.frags,x.deaths,Math.ceil(x.health),Math.ceil(x.armor),x.sseq,x.hurtT>0?1:0,x.grounded?1:0,r2(x.doubleT||0),r2(x.invisT||0),r2(x.speedT||0),r2(x.shieldT||0),r2(x.jetT||0),r2(x.regenT||0),r2(x.invisFlickerT||0),x.lives==null?-1:x.lives]),hh:hillHolder,cf:CTF?CTF.f.map(F=>[F.st==='base'?0:F.st==='carried'?1:2,F.by,r2(F.pos.x),r2(F.pos.y),r2(F.pos.z)]):null,
   pk:PICKUPS.map(p=>p.active?1:0).join(''),pg:NET.conns.filter(x=>x.ent).map(x=>[x.ent.nid,x.ent.ping==null?-1:x.ent.ping]),am:c.ent.ammo,ow:c.ent.owned,ev:c.q,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null};}
 function netTick(dt){if(NET.ghosts.length){const now=performance.now();for(const g of [...NET.ghosts])if(now>g.until)dropGhost(g);}NET.pingT=(NET.pingT||0)-dt;if(NET.pingT<=0){NET.pingT=2;const now=performance.now();for(const c of NET.conns){try{c.dc.send({t:'pi',c:now});}catch(e){}}}if(state==='menu'){NET.lobbyT=(NET.lobbyT||0)-dt;if(NET.lobbyT<=0){NET.lobbyT=2;broadcastLobby();}return;}NET.sendT-=dt;if(NET.sendT>0)return;NET.sendT=.05;for(const c of NET.conns){if(!c.ent)continue;try{c.dc.send(snapFor(c));}catch(e){}c.q=[];}}
 /* client */
@@ -1268,7 +1269,7 @@ function clearCProjs(){for(const p of cprojs)scene.remove(p.mesh);cprojs.length=
 function onClientData(d){
   if(d.t==='init'){reconDone();NET.off=null;if(curMap!==d.map)loadMap(d.map);NET.mode='client';if(d.br)for(let i=0;i<d.br.length;i++)setBridgeState(i,!!d.br[i]);gameMode=d.mode||'ffa';teamScores=d.teamScores||[0,0];if(d.rt!=null)REACTOR.timer=d.rt;if(d.rd!=null)setReactorDark(!!d.rd,false);if(d.st!=null)SHIP.timer=d.st;if(d.swv!=null)SHIP.waveT=d.swv;if(d.swi!=null)SHIP.waveId=d.swi;netStatus('');NET.myNid=d.nid;
     for(const b of bots){b.alive=false;b.mesh.group.visible=false;}for(const x of NET.byNid.values())if(x!==player&&!bots.includes(x)&&x.mesh)scene.remove(x.mesh.group);NET.byNid.clear();applyRoster(d.roster);clearCProjs();
-    setupHill();matchTime=d.mt;firstBlood=true;state=d.intro?'intro':'play';introT=d.intro?3.2:0;player.alive=false;player.sseq=-1;
+    setupHill();setupCtf();matchTime=d.mt;firstBlood=true;state=d.intro?'intro':'play';introT=d.intro?3.2:0;player.alive=false;player.sseq=-1;
     hideScreens();$('end').classList.add('hidden');$('hud').style.display=d.intro?'none':'block';$('feed').innerHTML='';feedList.length=0;$('chatlog').innerHTML='';chatList.length=0;showIntroCard(d.intro);startMusic('battle');
     updateNetInfo();if(!d.intro)requestLock();announce(MODE_ANN[gameMode]||'В БОЙ!');return;}
   if(d.t==='pi'){netSend({t:'po',c:d.c});return;}
@@ -1285,7 +1286,7 @@ function onClientData(d){
     e.tpos.set(a[1],a[2],a[3]);if(!was&&a[6]){e.pos.copy(e.tpos);e.buf=[];}
     if(d.ht!=null&&a[6]){if(!e.buf)e.buf=[];const b=e.buf;if(!b.length||d.ht>b[b.length-1].t)b.push({t:d.ht,p:e.tpos.clone(),y:a[4],pi:a[5]});if(b.length>30)b.shift();}
     e.yaw=a[4];e.pitch=a[5];e.alive=!!a[6];e.weapon=a[7];e.vel.set(a[8],a[9],a[10]);e.hurtT=a[16]?.15:0;e.grounded=!!a[17];e.mesh.group.visible=e.alive;}
-  if(d.hh!=null)hillHolder=d.hh;matchTime=d.mt;teamScores=d.ts||teamScores;if(d.rt!=null)REACTOR.timer=d.rt;if(d.rd!=null&&REACTOR.dark!==!!d.rd)setReactorDark(!!d.rd,false);if(d.st!=null)SHIP.timer=d.st;if(d.swv!=null&&Math.abs(SHIP.waveT-d.swv)>.25)SHIP.waveT=d.swv;if(d.swi!=null)SHIP.waveId=d.swi;player.ammo=d.am;player.owned=d.ow;
+  if(d.hh!=null)hillHolder=d.hh;if(d.cf&&CTF)d.cf.forEach((a,i)=>{const F=CTF.f[i];F.st=['base','carried','dropped'][a[0]];F.by=a[1];F.pos.set(a[2],a[3],a[4]);});matchTime=d.mt;teamScores=d.ts||teamScores;if(d.rt!=null)REACTOR.timer=d.rt;if(d.rd!=null&&REACTOR.dark!==!!d.rd)setReactorDark(!!d.rd,false);if(d.st!=null)SHIP.timer=d.st;if(d.swv!=null&&Math.abs(SHIP.waveT-d.swv)>.25)SHIP.waveT=d.swv;if(d.swi!=null)SHIP.waveId=d.swi;player.ammo=d.am;player.owned=d.ow;
   if(!player.owned[player.weapon]||player.ammo[player.weapon]<=0)autoSwitch(player);
   for(let i=0;i<PICKUPS.length;i++){const act=d.pk[i]==='1',p=PICKUPS[i];if(p.active!==act){p.active=act;p.mesh.visible=act;}}
   for(const v of d.ev)clientEvent(v);}
@@ -1317,7 +1318,7 @@ function clientEvent(v){const V=a=>new V3(a[0],a[1],a[2]);switch(v.t){
   case'go':finishIntro();break;
   case'end':clientEnd(v);break;}}
 function clientEnd(result){state='end';let title,voice;
-  if(gameMode==='team'){teamScores=result.ts||teamScores;title=result.team==null?'НИЧЬЯ':result.team===player.team?'ВАША КОМАНДА ПОБЕДИЛА!':`${TEAM_NAMES[result.team]} ПОБЕДИЛИ`;voice=result.team===player.team?'Ваша команда победила':'Матч окончен';}
+  if(isTeam()){teamScores=result.ts||teamScores;title=result.team==null?'НИЧЬЯ':result.team===player.team?'ВАША КОМАНДА ПОБЕДИЛА!':`${TEAM_NAMES[result.team]} ПОБЕДИЛИ`;voice=result.team===player.team?'Ваша команда победила':'Матч окончен';}
   else{const w=NET.byNid.get(result.w);title=w===player?'ВЫ ПОБЕДИЛИ!':w?`ПОБЕДИТЕЛЬ: ${nm(w)}`:'МАТЧ ОКОНЧЕН';voice=w===player?'Вы победили':'Матч окончен';}
   $('endtitle').innerHTML=title;$('endboard').innerHTML=boardHTML();$('endstats').innerHTML=(result.st?statsHTML(result.st,player.nid):'')+'<div class="hint" style="margin-top:10px">Хост выбирает следующую карту…</div>';
   $('again').classList.add('hidden');$('tomenu').textContent='ВЫЙТИ';$('end').classList.remove('hidden');$('hud').style.display='none';showIntroCard(false);startMusic('lobby');speak(voice);if(document.exitPointerLock)document.exitPointerLock();}
@@ -1347,7 +1348,7 @@ function clientUpdate(dt){time+=dt;if(state==='intro'){introT-=dt;if(introT<=0)f
   for(let i=cprojs.length-1;i>=0;i--){const p=cprojs[i];p.life-=dt;p.pos.addScaledVector(p.vel,dt);p.mesh.position.copy(p.pos);
     if(p.w.id===2)emit(p.pos,rv(.6).add(new V3(0,.5,0)),R()<.3?0xff8030:0x55505a,.25,.6,-.5,false,1);else{p.mesh.rotation.z+=dt*10;if(R()<.6)emit(p.pos,rv(.5),0x40ffff,.06,.25);}
     if(p.life<=0||pointSolid(p.pos.x,p.pos.y,p.pos.z)){scene.remove(p.mesh);cprojs.splice(i,1);}}
-  if(curMap===8)advanceGhostWave(dt,true);hillVisual();
+  if(curMap===8)advanceGhostWave(dt,true);hillVisual();ctfVisual();
   for(const e of ents)if(e.mesh)updateBotMesh(e,dt);
   NET.sendT-=dt;if(NET.sendT<=0){NET.sendT=.033;netSend({t:'u',p:a3r(player.pos),v:a3r(player.vel),y:r2(player.yaw),pi:r2(player.pitch),w:player.weapon,g:player.grounded?1:0,s:player.sseq});}}
 function lavaCheck(e,dt,doDamage,doBounce){for(const L of lavaZones)if(e.pos.x>L.x0&&e.pos.x<L.x1&&e.pos.z>L.z0&&e.pos.z<L.z1&&e.pos.y<L.y){e.lavaT=(e.lavaT||0)-dt;if(e.lavaT<=0){e.lavaT=.35;if(doBounce){e.vel.y=12;e.grounded=false;}for(let k=0;k<12;k++)emit(e.pos,new V3((R()-.5)*4,3+R()*4,(R()-.5)*4),R()<.5?0xff6000:0xffc020,.15,.6,10);if(doDamage)damage(e,25,null,LAVA);return;}}}
@@ -1375,9 +1376,43 @@ function updateHill(dt){if(gameMode!=='koth'||!HILL)return;const inz=ents.filter
   if(state==='play'&&inz.length===1){const e=inz[0];e.hillAcc=(e.hillAcc||0)+dt;if(e.hillAcc>=1){e.hillAcc-=1;e.frags++;if(e===player)playSnd('hit');else if(e.remote)sendTo(e,{t:'hm'});if(e.frags>=fragLimit())endMatch();}}}
 function hillVisual(){if(!hillMesh)return;const c=hillColor(),p=.18+.08*Math.sin(time*4);for(const m of hillMesh.userData.mats)m.color.setHex(c);hillMesh.userData.mats[0].opacity=hillHolder?p+.1:p;}
 function hillStatus(){if(hillHolder===0)return'ВЫСОТА СВОБОДНА';if(hillHolder<0)return'ВЫСОТА СПОРНАЯ';if(hillHolder===player.nid)return'<span style="color:#ffd040">ВЫСОТА ВАША</span>';const e=NET.byNid.get(hillHolder)||ents.find(x=>x.nid===hillHolder);return'ВЫСОТА: '+(e?nm(e):'?');}
+/* capture the flag */
+let CTF=null;
+// Hand-picked opposite bases where the automatic farthest-pair choice lands on walls, bridges or a cramped hub.
+const CTF_BASES={0:[23,24],2:[2,4],4:[1,2],5:[15,16],6:[3,4],9:[5,8]};
+function ctfDist(a){const N=NODES.length,d=new Array(N).fill(1e9),done=new Array(N).fill(false);d[a]=0;for(let k=0;k<N;k++){let u=-1;for(let i=0;i<N;i++)if(!done[i]&&(u<0||d[i]<d[u]))u=i;if(u<0||d[u]>=1e9)break;done[u]=true;for(const v of ADJ[u]){const nd=d[u]+NODES[u].distanceTo(NODES[v]);if(nd<d[v])d[v]=nd;}}return d;}
+function setupCtf(){if(CTF)for(const m of CTF.meshes)if(m.parent)m.parent.remove(m);CTF=null;if(gameMode!=='ctf'||!NODES.length)return;
+  const N=NODES.length,isPadN=i=>PADS.some(p=>onPad({pos:NODES[i]},p)),D=[];for(let i=0;i<N;i++)D.push(ctfDist(i));let ba=0,bb=1,bv=-1;
+  for(let a=0;a<N;a++)for(let b=a+1;b<N;b++){if(isPadN(a)||isPadN(b)||ADJ[a].length<2||ADJ[b].length<2)continue;const v=Math.min(D[a][b],D[b][a]);if(v<1e9&&v>bv){bv=v;ba=a;bb=b;}}
+  if(CTF_BASES[curMap]){[ba,bb]=CTF_BASES[curMap];}
+  const basePos=[NODES[ba].clone(),NODES[bb].clone()],meshes=[];
+  const mk=t=>{const g=new THREE.Group(),col=TEAM_COLORS[t];const pole=new THREE.Mesh(new THREE.BoxGeometry(.1,2.6,.1),new THREE.MeshLambertMaterial({color:0xdddddd}));pole.position.y=1.3;const cloth=new THREE.Mesh(new THREE.BoxGeometry(1.3,.8,.06),new THREE.MeshBasicMaterial({color:col}));cloth.position.set(.68,2.15,0);
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,14,6,1,true),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}));beam.position.y=8;g.add(pole,cloth,beam);g.userData.cloth=cloth;LV.add(g);meshes.push(g);return g;};
+  const ring=t=>{const r=new THREE.Mesh(new THREE.RingGeometry(1.5,1.9,24),new THREE.MeshBasicMaterial({color:TEAM_COLORS[t],transparent:true,opacity:.75,side:THREE.DoubleSide,depthWrite:false}));const up=curMap===9?cubeUpAt(basePos[t]):UP;r.quaternion.setFromUnitVectors(new V3(0,0,1),up);r.position.copy(basePos[t]).addScaledVector(up,.06);LV.add(r);meshes.push(r);};
+  ring(0);ring(1);CTF={bases:[ba,bb],basePos,f:[0,1].map(t=>({st:'base',by:0,pos:basePos[t].clone(),t:0,mesh:mk(t)})),meshes};}
+function ctfEnt(n){return n?(NET.byNid.get(n)||ents.find(x=>x.nid===n)):null;}
+function ctfTell(team,own,other){for(const h of ents){if(h!==player&&!h.remote)continue;const s=h.team===team?own:other;if(!s)continue;if(h===player)announce(s);else sendTo(h,{t:'ann',s});}}
+function ctfReturn(i,quiet){const F=CTF.f[i];F.st='base';F.by=0;F.pos.copy(CTF.basePos[i]);if(!quiet){feed(`<span class="w">флаг: ${TEAM_NAMES[i].toLowerCase()} — на базе</span>`);playSnd('pickup');}}
+function ctfDrop(e,lost){if(!CTF)return;for(let i=0;i<2;i++){const F=CTF.f[i];if(F.st==='carried'&&F.by===e.nid){if(lost){ctfReturn(i);continue;}F.st='dropped';F.by=0;F.pos.copy(e.pos);F.t=20;feed(`${nm(e)} <span class="w">теряет флаг</span>`);}}}
+function ctfCarrying(e){return!!CTF&&CTF.f.some(F=>F.st==='carried'&&F.by===e.nid);}
+function updateCtf(dt){if(gameMode!=='ctf'||!CTF||state!=='play')return;
+  for(let i=0;i<2;i++){const F=CTF.f[i];
+    if(F.st==='carried'){const c=ctfEnt(F.by);if(!c||!c.alive||c.disc){F.st='dropped';F.by=0;F.t=20;}else F.pos.copy(c.pos);}
+    if(F.st==='dropped'){F.t-=dt;if(F.t<=0){ctfReturn(i);continue;}}
+    if(F.st==='carried')continue;
+    for(const e of ents){if(!e.alive||e.disc||e.team==null||e.pos.distanceTo(F.pos)>1.8)continue;
+      if(e.team!==i){F.st='carried';F.by=e.nid;feed(`${nm(e)} <span class="w">взял флаг</span>`);playSnd('weapon',e===player?null:e.pos);ctfTell(i,'ВАШ ФЛАГ УКРАДЕН!','ФЛАГ У НАС!');if(e===player)centerMsg('Несите флаг на свою базу',3);else if(e.remote)sendTo(e,{t:'cm',h:'Несите флаг на свою базу'});break;}
+      else if(F.st==='dropped'){ctfReturn(i);if(e.st)e.st.ret=(e.st.ret||0)+1;break;}}}
+  for(let i=0;i<2;i++){const F=CTF.f[i];if(F.st!=='carried')continue;const c=ctfEnt(F.by),j=1-i;if(!c||c.team!==j)continue;
+    if(CTF.f[j].st==='base'&&c.pos.distanceTo(CTF.basePos[j])<2.2){teamScores[j]++;if(c.st)c.st.caps=(c.st.caps||0)+1;ctfReturn(i,true);feed(`${nm(c)} <span class="w">приносит флаг!</span>`);playSnd('respawn');ctfTell(j,TEAM_NAMES[j]+' ЗАХВАТИЛИ ФЛАГ!',TEAM_NAMES[j]+' ЗАХВАТИЛИ ФЛАГ!');if(teamScores[j]>=fragLimit())endMatch();}}}
+function ctfVisual(){if(!CTF)return;for(let i=0;i<2;i++){const F=CTF.f[i],m=F.mesh;let p=F.pos,up=curMap===9?cubeUpAt(F.pos):UP;
+  if(F.st==='carried'){const c=ctfEnt(F.by);if(c){p=c.pos;up=entityUp(c);}m.visible=!!c&&c!==player&&c.alive;m.position.copy(p).addScaledVector(up,1.2);}else{m.visible=true;m.position.copy(p);}
+  m.quaternion.setFromUnitVectors(UP,up);m.userData.cloth.rotation.y=Math.sin(time*3+i)*.35;}}
+function ctfStatus(i){const F=CTF.f[i];if(F.st==='base')return'НА БАЗЕ';if(F.st==='dropped')return'ЛЕЖИТ';const c=ctfEnt(F.by);return c===player?'<span style="color:#ffd040">У ВАС</span>':'У '+(c?nm(c):'?');}
 function lmsLeft(){return ents.filter(e=>!e.out).length;}
 function lmsCheck(){if(gameMode==='lms'&&state==='play'&&ents.length>1&&lmsLeft()<=1)endMatch();}
 function spawnEntity(e){clearPowerups(e);let best=SPAWNS[0],bd=-1;for(let k=0;k<6;k++){const sp=SPAWNS[(R()*SPAWNS.length)|0];let md=1e9;for(const o of ents)if(o!==e&&o.alive)md=Math.min(md,o.pos.distanceTo(sp));if(md>bd){bd=md;best=sp;}}
+  if(gameMode==='ctf'&&CTF&&e.team!=null){const bp=CTF.basePos[e.team],sp=[...SPAWNS].sort((a,b)=>a.distanceTo(bp)-b.distanceTo(bp));best=sp[(R()*Math.min(3,sp.length))|0];}
   e.pos.copy(best);if(curMap===9){e.yaw=0;e.up.set(0,1,0);cubeFrame(e,true);}e.pos.addScaledVector(entityUp(e),.01);e.vel.set(0,0,0);e.health=100;e.armor=0;e.owned=Array(WEAPONS.length).fill(0);e.owned[0]=e.owned[1]=1;e.ammo=Array(WEAPONS.length).fill(0);e.ammo[0]=40;e.ammo[1]=100;e.weapon=1;e.alive=true;e.cd=.3;e.grounded=false;
   if(curMap!==9)e.yaw=Math.atan2(e.pos.x,e.pos.z);e.pitch=0;e.streak=0;e.multi=0;e.sseq++;e.deadT=0;if(e.mesh)e.mesh.group.visible=true;nev({t:'sp',e:e.nid,p:a3r(e.pos)});
   if(e.isBot){e.path=null;e.target=null;e.mesh.group.visible=true;const T=TRAITS[e.trait];if(T&&R()<.7){const w=T.fav[(R()*T.fav.length)|0];e.owned[w]=1;e.ammo[w]=WEAPONS[w].pick;}else if(R()<.55){const w=[2,3,4,5,6][(R()*5)|0];e.owned[w]=1;e.ammo[w]=WEAPONS[w].pick;}}
@@ -1440,6 +1475,7 @@ const MULTI=['','','ДВОЙНОЕ УБИЙСТВО','ТРОЙНОЕ УБИЙС�
 const STREAK={5:'СЕРИЯ УБИЙСТВ!',10:'НЕУДЕРЖИМ!',15:'БОГОПОДОБЕН!'};
 const nm=e=>`<span style="color:${hex(teamColorFor(e))}">${e.name}</span>`;
 function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t);t.alive=false;t.deaths++;t.streak=0;t.deadT=0;gibFX(t);playSnd('death',t===player?null:t.pos);if(t===player)speakBattleLine(DEATH_LINES);nev({t:'gib',e:t.nid});
+  if(gameMode==='ctf')ctfDrop(t,!!(w&&w.lava)||t.pos.y<-40);
   if(t.st&&(!att||att===t))t.st.self++;
   if(att&&att!==t&&att.st&&t.st){if(w&&w.id!=null)att.st.kills[w.id]++;else att.st.push++;att.st.vic[t.nid]=(att.st.vic[t.nid]||0)+1;t.st.by[att.nid]=(t.st.by[att.nid]||0)+1;att.st.best=Math.max(att.st.best,att.streak+1);}
   if(gameMode==='lms'&&t.lives!=null){t.lives--;if(t.lives<=0){t.out=true;}}
@@ -1458,7 +1494,7 @@ function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t)
   else if(t.remote){t.mesh.group.visible=false;sendTo(t,{t:'dead',h:dh});}
   else{t.mesh.group.visible=false;t.respawnT=2.5;}
   if(t.out)feed(`${nm(t)} <span class="w">выбывает</span>`);
-  if(state==='play'&&att&&gameMode!=='koth'&&gameMode!=='lms'&&(gameMode==='team'?teamScores[att.team]>=fragLimit():att.frags>=fragLimit()))endMatch();
+  if(state==='play'&&att&&gameMode!=='koth'&&gameMode!=='lms'&&gameMode!=='ctf'&&(isTeam()?teamScores[att.team]>=fragLimit():att.frags>=fragLimit()))endMatch();
   lmsCheck();}
 
 function updateProjs(dt){for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.life-=dt;const step=p.vel.length()*dt,d=p.vel.clone().normalize(),o=a3(p.pos),da=a3(d),tl=rayLevel(o,da,step),h=rayEnts(o,da,tl,p.owner);
@@ -1516,7 +1552,15 @@ function applyMove(e,wish,dt,jump){const up=entityUp(e),sp=(e.isBot?SKILL[diffic
 function chooseWeapon(b,dist){const has=i=>b.owned[i]&&b.ammo[i]>0;let w=b.weapon;const T=TRAITS[b.trait],pw=T&&T.pick?T.pick(has,dist):-1;
   if(pw>=0)w=pw;else if(has(6)&&dist>22)w=6;else if(has(3)&&dist>18)w=3;else if(has(4)&&dist<12)w=4;else if(has(5)&&dist>5&&dist<24)w=5;else if(has(2)&&dist>5&&dist<28)w=2;else if(has(1))w=1;else if(has(0))w=0;else if(has(2))w=2;else if(has(3))w=3;
   if(w!==b.weapon){b.weapon=w;b.cd=Math.max(b.cd,.3);}}
-function planPath(b){const s=nearestNode(b.pos);let goal=-1;const tr=b.trait,scared=tr==='coward'&&b.health<45;
+function ctfGoal(b){if(gameMode!=='ctf'||!CTF||b.team==null)return -1;const my=b.team,en=1-my,F=CTF.f,mine=F[my],theirs=F[en];
+  if(theirs.st==='carried'&&theirs.by===b.nid)return CTF.bases[my];
+  if(mine.st==='dropped'&&R()<.85)return nearestNode(mine.pos);
+  if(mine.st==='carried'&&R()<(b.ctfRole==='def'?.9:.6)){const c=ctfEnt(mine.by);if(c)return nearestNode(c.pos);}
+  if(b.ctfRole==='def'){const n=CTF.bases[my],a=ADJ[n];return R()<.6||!a.length?n:a[(R()*a.length)|0];}
+  if(theirs.st==='carried'){const c=ctfEnt(theirs.by);if(c&&R()<.5)return nearestNode(c.pos);return CTF.bases[my];}
+  return nearestNode(theirs.pos);}
+function planPath(b){const s=nearestNode(b.pos);let goal=ctfGoal(b);const tr=b.trait,scared=tr==='coward'&&b.health<45;
+  if(goal>=0){const path=bfs(s,goal);b.path=path?(path[0]===s?path:[s,...path]):[s,ADJ[s][(R()*ADJ[s].length)|0]];return;}
   if(HILL&&gameMode==='koth'&&!scared&&R()<(tr==='collector'?.6:.85))goal=HILL.node;
   else if(b.target&&!scared&&R()<(tr==='rush'?.85:tr==='sniper'?.15:.4))goal=nearestNode(b.target.pos);
   else if(R()<(tr==='collector'||scared?.97:.75)){let bv=0;for(const p of PICKUPS){if(!p.active||modeWeapon()!=null)continue;let v=0;const t=p.type;
@@ -1535,6 +1579,7 @@ function updateBot(b,dt){
     if(!best&&b.alertT<=0)b.target=null;else if(best)b.target=best;
     if(best)chooseWeapon(b,bdist);}
   if(b.target&&!b.target.alive)b.target=null;
+  if(gameMode==='ctf'){b.ctfT=(b.ctfT||0)-dt;if(b.ctfT<=0){b.ctfT=1.5+R();b.path=null;}}
   const holdHill=gameMode==='koth'&&HILL&&inHill(b)&&!(b.trait==='coward'&&b.health<45);
   if(holdHill)b.path=[];else if(!b.path||!b.path.length)planPath(b);
   const wish=new V3();let jump=false;
@@ -1544,7 +1589,7 @@ function updateBot(b,dt){
   // Hop onto knee-high steps and trims in the way (there is no automatic step-up).
   if(curMap!==9&&b.grounded&&wish.lengthSq()>.01){const f=wish.clone().normalize(),o=b.pos.clone();o.y+=.45;if(rayLevel(a3(o),a3(f),.8)<.8){o.y+=.8;if(rayLevel(a3(o),a3(f),.8)>=.8)jump=true;}}
   const pathWish=wish.clone();
-  if(b.target&&b.grounded){const up=entityUp(b),td=b.target.pos.clone().sub(b.pos).addScaledVector(up,-b.target.pos.clone().sub(b.pos).dot(up));const dist=td.length();td.normalize();b.strafePh+=dt*b.strafeF;const s=Math.sin(b.strafePh),right=new V3().crossVectors(aimDir(b),up).normalize();
+  if(b.target&&b.grounded&&!ctfCarrying(b)){const up=entityUp(b),td=b.target.pos.clone().sub(b.pos).addScaledVector(up,-b.target.pos.clone().sub(b.pos).dot(up));const dist=td.length();td.normalize();b.strafePh+=dt*b.strafeF;const s=Math.sin(b.strafePh),right=new V3().crossVectors(aimDir(b),up).normalize();
     wish.addScaledVector(right,s*1.1);const tr=b.trait;if(tr==='rush'){if(dist>2.5)wish.addScaledVector(td,.9);}else if(tr==='coward'&&b.health<45)wish.addScaledVector(td,-1.4);else if(tr==='sniper'&&dist<16)wish.addScaledVector(td,-.9);else if(dist<7)wish.addScaledVector(td,-.6);
     if(gameMode==='koth'&&HILL&&inHill(b)&&!(tr==='coward'&&b.health<45))wish.multiplyScalar(.35);if(wish.lengthSq()>0)wish.normalize();jump=jump||R()<dt*.5;}
   // Ledge sense on maps with a deadly drop: never strafe or hop toward a missing floor.
@@ -1620,7 +1665,7 @@ const plural=(n,a,b,c)=>{const m=n%10,h=n%100;return n+' '+(m===1&&h!==11?a:m>=2
 function matchSummary(){const out={};for(const e of ents){const s=e.st||newStats(),sh=s.shots.reduce((a,b)=>a+b,0),hi=s.hits.reduce((a,b)=>a+b,0);
   let fw=-1,fk=0;s.kills.forEach((k,i)=>{if(k>fk){fk=k;fw=i;}});if(fw<0){let m=0;s.shots.forEach((k,i)=>{if(k>m){m=k;fw=i;}});}
   const top=o=>{let n=0,c=0;for(const k in o)if(o[k]>c){c=o[k];n=+k;}return c?[n,c]:null;};
-  out[e.nid]={a:sh?Math.min(100,Math.round(100*hi/sh)):null,sh,fw,fk,bs:s.best,d:Math.round(s.dmg),ne:top(s.by),vi:top(s.vic),sk:s.self,pu:s.push};}
+  out[e.nid]={a:sh?Math.min(100,Math.round(100*hi/sh)):null,sh,fw,fk,bs:s.best,d:Math.round(s.dmg),ne:top(s.by),vi:top(s.vic),sk:s.self,pu:s.push,cp:s.caps||0};}
   return out;}
 function statsHTML(sum,me){const ent=n=>NET.byNid.get(n)||ents.find(x=>x.nid===n),name=n=>{const e=ent(n);return e?nm(e):'?';};const my=sum[me];let h='<div class="endstats">';
   if(my){h+='<div class="col"><div class="sh">ВАШ МАТЧ</div>';
@@ -1634,19 +1679,21 @@ function statsHTML(sum,me){const ent=n=>NET.byNid.get(n)||ents.find(x=>x.nid===n
   let x=best(s=>s.a||0,s=>s.sh>=15);if(x)aw.push(['МЕТКИЙ ГЛАЗ',x[0],x[1]+'% попаданий']);
   x=best(s=>s.d);if(x)aw.push(['МЯСОРУБКА',x[0],x[1]+' урона']);
   x=best(s=>s.bs);if(x&&x[1]>=3)aw.push(['НЕУДЕРЖИМЫЙ',x[0],'серия '+x[1]]);
+  x=best(s=>s.cp||0);if(x)aw.push(['ЗНАМЕНОСЕЦ',x[0],'флагов: '+x[1]]);
   x=best(s=>s.pu);if(x)aw.push(['ВЫШИБАЛА',x[0],'в пропасть: '+x[1]]);
   x=best(s=>s.sk);if(x&&x[1]>=2)aw.push(['САМ СЕБЕ ВРАГ',x[0],'самоподрывы: '+x[1]]);
   if(aw.length){h+='<div class="col"><div class="sh">НАГРАДЫ</div>'+aw.slice(0,4).map(([t,n,d])=>`<div><span class="aw">${t}</span> ${name(n)} <i>${d}</i></div>`).join('')+'</div>';}
   return h+'</div>';}
 function sorted(){if(gameMode==='lms')return [...ents].sort((a,b)=>(a.out?1:0)-(b.out?1:0)||(b.lives||0)-(a.lives||0)||b.frags-a.frags||a.deaths-b.deaths);return [...ents].sort((a,b)=>b.frags-a.frags||a.deaths-b.deaths);}
 function pingTxt(e){if(e.isBot)return'БОТ';if(e.ping!=null)return e.ping+' МС';if(isHost()?e===player:!e.remote&&e!==player)return'ХОСТ';return'…';}
-function boardHTML(){const net=isHost()||isClient(),cols=net?4:3;const lms=gameMode==='lms',head=`<table><tr><th>ИГРОК</th><th class="n">${gameMode==='koth'?'ОЧКИ':'ФРАГИ'}</th><th class="n">${lms?'ЖИЗНИ':'СМЕРТИ'}</th>${net?'<th class="n">ПИНГ</th>':''}</tr>`;const row=e=>`<tr class="${e===player?'me':''}"><td>${e===player?e.name:nm(e)}</td><td class="n">${e.frags}</td><td class="n">${lms?(e.out?'—':e.lives):e.deaths}</td>${net?`<td class="n">${pingTxt(e)}</td>`:''}</tr>`;if(gameMode==='team')return head+TEAM_NAMES.map((name,t)=>`<tr class="teamhead"><td colspan="${cols}" style="color:${hex(TEAM_COLORS[t])}">${name} — ${teamScores[t]} / ${fragLimit()}</td></tr>${sorted().filter(e=>e.team===t).map(row).join('')}`).join('')+'</table>';return head+sorted().map(row).join('')+'</table>';}
+function boardHTML(){const net=isHost()||isClient(),cols=net?4:3;const lms=gameMode==='lms',head=`<table><tr><th>ИГРОК</th><th class="n">${gameMode==='koth'?'ОЧКИ':'ФРАГИ'}</th><th class="n">${lms?'ЖИЗНИ':'СМЕРТИ'}</th>${net?'<th class="n">ПИНГ</th>':''}</tr>`;const row=e=>`<tr class="${e===player?'me':''}"><td>${e===player?e.name:nm(e)}</td><td class="n">${e.frags}</td><td class="n">${lms?(e.out?'—':e.lives):e.deaths}</td>${net?`<td class="n">${pingTxt(e)}</td>`:''}</tr>`;if(isTeam())return head+TEAM_NAMES.map((name,t)=>`<tr class="teamhead"><td colspan="${cols}" style="color:${hex(TEAM_COLORS[t])}">${name} — ${teamScores[t]} / ${fragLimit()}</td></tr>${sorted().filter(e=>e.team===t).map(row).join('')}`).join('')+'</table>';return head+sorted().map(row).join('')+'</table>';}
 function updateHUD(dt){
   const hp=Math.max(0,Math.ceil(player.health));setT('hp',hp);$('hp').className=hp<30?'low':hp>100?'over':'';setT('ar',Math.ceil(player.armor));
   const w=WEAPONS[player.weapon];setT('ammo',player.ammo[w.id]);setT('wname',w.name);
   setH('wbar',WEAPONS.map(x=>`<div class="${player.owned[x.id]?'own':''} ${x.id===player.weapon?'cur':''}">${x.id+1}</div>`).join(''));
   const mm=Math.floor(matchTime/60),ss=Math.floor(matchTime%60);setT('timer',`${mm}:${ss<10?'0':''}${ss}`);$('shieldfx').style.opacity=player.shieldT>0?'.72':'0';
-  const srt=sorted();if(gameMode==='team'){setT('frags',`${TEAM_NAMES[player.team]} ${teamScores[player.team]||0} / ${fragLimit()}`);setT('rank',`ЛИЧНЫЕ ФРАГИ ${player.frags}`);}else if(gameMode==='koth'){setT('frags',`ОЧКИ ${player.frags} / ${fragLimit()}`);setH('rank',`МЕСТО ${srt.indexOf(player)+1} ИЗ ${ents.length}<br>${hillStatus()}`);}
+  const srt=sorted();if(gameMode==='ctf'&&CTF&&player.team!=null){const mt=player.team,ot=1-mt;setT('frags',`${TEAM_NAMES[mt]} ${teamScores[mt]||0} : ${teamScores[ot]||0} · ДО ${fragLimit()}`);setH('rank',`ВАШ ФЛАГ: ${ctfStatus(mt)}<br>ФЛАГ ВРАГА: ${ctfStatus(ot)}`);}
+  else if(isTeam()){setT('frags',`${TEAM_NAMES[player.team]} ${teamScores[player.team]||0} / ${fragLimit()}`);setT('rank',`ЛИЧНЫЕ ФРАГИ ${player.frags}`);}else if(gameMode==='koth'){setT('frags',`ОЧКИ ${player.frags} / ${fragLimit()}`);setH('rank',`МЕСТО ${srt.indexOf(player)+1} ИЗ ${ents.length}<br>${hillStatus()}`);}
   else if(gameMode==='lms'){setT('frags',player.out?'ВЫ ВЫБЫЛИ':`ЖИЗНИ ${player.lives}`);setT('rank',`ОСТАЛОСЬ ${lmsLeft()} ИЗ ${ents.length}`);}
   else{setT('frags',`ФРАГИ ${player.frags} / ${fragLimit()}`);setT('rank',`МЕСТО ${srt.indexOf(player)+1} ИЗ ${ents.length}`);}
   for(let i=feedList.length-1;i>=0;i--){feedList[i].t-=dt;if(feedList[i].t<=0){feedList[i].d.remove();feedList.splice(i,1);}}
@@ -1672,12 +1719,12 @@ function newStats(){const z=()=>Array(WEAPONS.length).fill(0);return{shots:z(),h
 function resetMatch(){for(const e of ents){e.st=newStats();e.frags=0;e.deaths=0;e.alive=false;e.hillAcc=0;e.lives=gameMode==='lms'?LMS_LIVES:null;e.out=false;if(e.isBot)e.mesh.group.visible=false;}
   for(const p of projs)scene.remove(p.mesh);projs.length=0;for(const p of PICKUPS){p.active=true;p.mesh.visible=true;}
   firstBlood=false;matchTime=MATCH_TIME;for(const e of ents)spawnEntity(e);}
-function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];const useBots=gameMode==='duel'?(NET.conns.length?[]:[bots[(R()*bots.length)|0]]):bots.slice(0,botCount);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...useBots];for(const b of bots)if(!useBots.includes(b)){b.alive=false;b.mesh.group.visible=false;}setupHill();assignBalancedTeams();resetMatch();state='intro';introT=3.2;showIntroCard(true);
+function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];const useBots=gameMode==='duel'?(NET.conns.length?[]:[bots[(R()*bots.length)|0]]):bots.slice(0,botCount);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...useBots];for(const b of bots)if(!useBots.includes(b)){b.alive=false;b.mesh.group.visible=false;}setupHill();setupCtf();assignBalancedTeams();{const c=[0,0];for(const b of bots)if(b.team!=null){b.ctfRole=c[b.team]++%2?'def':'att';}}resetMatch();state='intro';introT=3.2;showIntroCard(true);
   for(const c of NET.conns){c.q=[];try{c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:true,nid:c.ent.nid,roster:roster(),mt:matchTime,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});}catch(e){}}
   hideScreens();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';$('feed').innerHTML='';feedList.length=0;$('chatlog').innerHTML='';chatList.length=0;
   startMusic('battle');}
-function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(gameMode==='team'?{t:'end',team:teamWinner,ts:teamScores.slice(),st:matchSummary()}:{t:'end',w:w.nid,st:matchSummary()});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=gameMode==='team'?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;const sum=matchSummary();$('endboard').innerHTML=boardHTML();$('endstats').innerHTML=statsHTML(sum,player.nid);
-  $('end').classList.remove('hidden');$('hud').style.display='none';startMusic('lobby');speak(gameMode==='team'?(teamWinner==null?'Ничья':`${TEAM_NAMES[teamWinner]} победили`):w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
+function endMatch(){state='end';const w=sorted()[0],teamWinner=teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1;nev(isTeam()?{t:'end',team:teamWinner,ts:teamScores.slice(),st:matchSummary()}:{t:'end',w:w.nid,st:matchSummary()});$('again').classList.remove('hidden');$('again').textContent='ЕЩЁ РАЗ';$('tomenu').textContent=isHost()?'В ЛОББИ':'К ВЫБОРУ КАРТЫ';$('endtitle').innerHTML=isTeam()?(teamWinner==null?'НИЧЬЯ':`${TEAM_NAMES[teamWinner]} ПОБЕДИЛИ!`):w===player?'ВЫ ПОБЕДИЛИ!':`ПОБЕДИТЕЛЬ: ${nm(w)}`;const sum=matchSummary();$('endboard').innerHTML=boardHTML();$('endstats').innerHTML=statsHTML(sum,player.nid);
+  $('end').classList.remove('hidden');$('hud').style.display='none';startMusic('lobby');speak(isTeam()?(teamWinner==null?'Ничья':`${TEAM_NAMES[teamWinner]} победили`):w===player?'Вы победили':'Матч окончен');if(document.exitPointerLock)document.exitPointerLock();}
 function showPause(invite){if(state!=='play')return;closeChat();state='paused';mouseDown=false;mouseAltDown=false;updateNetInfo();
   $('pausetitle').textContent=invite?'ИГРА СОЗДАНА':'ПАУЗА';
   $('pause').classList.remove('hidden');if(locked&&document.exitPointerLock)document.exitPointerLock();}
@@ -1799,7 +1846,7 @@ addEventListener('mousemove',e=>{if(!(e.buttons&1))mouseDown=false;if(!(e.button
 /* ---------- main loop ---------- */
 function update(dt){time+=dt;if(state==='intro'){introT-=dt;if(introT<=0)finishIntro();return;}
   if(state==='play'||state==='paused'){matchTime-=dt;if(matchTime<=0){matchTime=0;endMatch();return;}if(state==='play')updatePlayer(dt);else if(player.alive)applyMove(player,new V3(),dt,false);}
-  if(state==='play')updateHill(dt);hillVisual();
+  if(state==='play'){updateHill(dt);updateCtf(dt);}hillVisual();ctfVisual();
   for(const b of bots)if(ents.includes(b))updateBot(b,dt);
   for(const e of ents){if(!e.alive){if(e.remote&&!e.disc&&!e.out){e.deadT=(e.deadT||0)+dt;if(e.deadT>RESPAWN_AUTO+.3)spawnEntity(e);}continue;}
     updatePowerups(e,dt);if(e.remote){e.cd-=dt;e.hurtT-=dt;if(e.health>100)e.health=Math.max(100,e.health-dt*1.5);lavaCheck(e,dt,true,false);voidCheck(e,true);continue;}
