@@ -7,7 +7,7 @@ function newStats(){const z=()=>Array(WEAPONS.length).fill(0);return{shots:z(),h
 function resetMatch(){for(const e of ents){e.st=newStats();e.frags=0;e.deaths=0;e.alive=false;e.hillAcc=0;e.lives=gameMode==='lms'?LMS_LIVES:null;e.out=false;if(e.isBot)e.mesh.group.visible=false;}
   for(const p of projs)scene.remove(p.mesh);projs.length=0;for(const p of PICKUPS){p.active=true;p.mesh.visible=true;}
   firstBlood=false;matchTime=MATCH_TIME;for(const e of ents)spawnEntity(e);}
-function startMatch(){initAudio();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];const useBots=gameMode==='duel'?(NET.conns.length?[]:[bots[(R()*bots.length)|0]]):bots.slice(0,botCount);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...useBots];for(const b of bots)if(!useBots.includes(b)){b.alive=false;b.mesh.group.visible=false;}setupHill();setupCtf();assignBalancedTeams();{const c=[0,0];for(const b of bots)if(b.team!=null){b.ctfRole=c[b.team]++%2?'def':'att';}}resetMatch();state='intro';introT=3.2;showIntroCard(true);
+function startMatch(){initAudio();clearCorpses();if(curMap!==selMap&&NET.conns.length===0)loadMap(selMap);gameMode=selectedMode;teamScores=[0,0];const useBots=gameMode==='duel'?(NET.conns.length?[]:[bots[(R()*bots.length)|0]]):bots.slice(0,botCount);ents=[player,...NET.conns.map(c=>c.ent).filter(Boolean),...useBots];for(const b of bots)if(!useBots.includes(b)){b.alive=false;b.mesh.group.visible=false;}setupHill();setupCtf();assignBalancedTeams();{const c=[0,0];for(const b of bots)if(b.team!=null){b.ctfRole=c[b.team]++%2?'def':'att';}}resetMatch();state='intro';introT=3.2;showIntroCard(true);
   for(const c of NET.conns){c.q=[];try{c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:true,nid:c.ent.nid,roster:roster(),mt:matchTime,rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});}catch(e){}}
   hideScreens();$('end').classList.add('hidden');$('pause').classList.add('hidden');$('hud').style.display='none';$('feed').innerHTML='';feedList.length=0;$('chatlog').innerHTML='';chatList.length=0;
   startMusic('battle');}
@@ -123,6 +123,7 @@ addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.target
   if(e.code==='Escape'&&state==='play'&&!locked)showPause(false);
   if(state==='play'){if(e.code==='KeyE'&&!e.repeat)requestReactorSwitch();if(e.code.startsWith('Digit')){const n=+e.code.slice(5)-1;if(n>=0&&n<WEAPONS.length)switchWeapon(player,n);}}
   if(state==='play'&&(e.code==='KeyT'||e.code==='Enter')&&!e.repeat){e.preventDefault();openChat();return;}
+  if(e.code==='KeyG'&&!e.repeat&&state==='play')requestTaunt();
   if(e.code==='F12'&&!e.repeat){e.preventDefault();screenshotPending=true;}});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseDown=false;mouseAltDown=false;});

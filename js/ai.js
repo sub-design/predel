@@ -95,8 +95,5 @@ function updateBot(b,dt){
   const turn=sk.turn*dt*(b.target?1:.7),dy=angDiff(dYaw,b.yaw);b.yaw+=clamp(dy,-turn,turn);b.pitch+=clamp(dPitch-b.pitch,-turn,turn);
   if(b.target&&b.reactT<=0&&b.cd<=0&&Math.abs(angDiff(dYaw,b.yaw))<.12&&Math.abs(dPitch-b.pitch)<.12)fire(b);}
 function updateEntityPowerVisual(e){if(!e.mesh)return;const alpha=e.invisT>0?(e.invisFlickerT>0?.72:.16):1;if(e.lastInvisAlpha!==alpha){e.lastInvisAlpha=alpha;e.mesh.group.traverse(o=>{if(!o.isMesh)return;const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(!m.userData.powerVisBase)m.userData.powerVisBase={transparent:m.transparent,opacity:m.opacity,depthWrite:m.depthWrite};const b=m.userData.powerVisBase,newTransparent=alpha<1||b.transparent;if(m.transparent!==newTransparent)m.needsUpdate=true;m.opacity=b.opacity*alpha;m.transparent=newTransparent;m.depthWrite=alpha<1?false:b.depthWrite;}});}if(e.mesh.shield)e.mesh.shield.visible=e.shieldT>0;}
-function updateBotMesh(b,dt){const m=b.mesh;if(!b.alive)return;m.group.position.copy(b.pos);if(curMap===9){const up=entityUp(b),q=new THREE.Quaternion().setFromUnitVectors(UP,up),qy=new THREE.Quaternion().setFromAxisAngle(UP,b.yaw);m.group.quaternion.copy(q).multiply(qy);}else m.group.rotation.set(0,b.yaw,0);updateEntityPowerVisual(b);
-  const hs=Math.hypot(b.vel.x,b.vel.z);b.walkPh+=dt*hs*1.3;const sw=b.grounded?Math.sin(b.walkPh)*Math.min(1,hs/6)*.8:.5;
-  m.legL.rotation.x=sw;m.legR.rotation.x=b.grounded?-sw:-.3;m.armL.rotation.x=-sw*.6;m.armR.rotation.x=Math.PI/2+b.pitch;m.head.rotation.x=b.pitch*.5;
-  m.mat.emissive.setHex(b.doubleT>0?0x902000:b.hurtT>0?0x902020:0x000000);m.gunM.emissive.setHex(b.doubleT>0?0x902000:0x000000);}
+// updateBotMesh lives in anim.js
 

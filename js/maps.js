@@ -588,7 +588,7 @@ let LV=null,decalGroup=null,curMap=-1,selMap=0,waterViewOn=false;const decals=[]
 function updateWaterView(){const w=curMap===4&&WATER_ZONES.find(z=>player.pos.x>z.x0&&player.pos.x<z.x1&&player.pos.z>z.z0&&player.pos.z<z.z1);const wet=!!(w&&state==='play'&&player.alive&&player.pos.y+1.6<w.surface);if(wet===waterViewOn)return;waterViewOn=wet;$('waterfx').style.opacity=wet?'.85':'0';if(curMap===4){scene.fog.color.setHex(wet?0x143c56:MAPS[curMap].fog);scene.background.setHex(wet?0x143c56:MAPS[curMap].fog);}if(sfxFilter&&AC)sfxFilter.frequency.setTargetAtTime(wet?850:22000,AC.currentTime,.12);}
 function loadMap(i){
   if(LV){scene.remove(LV);LV.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
-  LV=new THREE.Group();scene.add(LV);decalGroup=new THREE.Group();LV.add(decalGroup);decals.length=0;if(typeof clearGibs==='function')clearGibs();resetMirrors();
+  LV=new THREE.Group();scene.add(LV);decalGroup=new THREE.Group();LV.add(decalGroup);decals.length=0;if(typeof clearGibs==='function')clearGibs();resetMirrors();if(typeof clearCorpses==='function')clearCorpses();
   solids.length=0;flames.length=0;padCones.length=0;PADS.length=0;PICKUPS.length=0;WATER_ZONES.length=0;BRIDGES.length=0;ICE_ZONES.length=0;lavaZones=[];
   for(const p of projs)scene.remove(p.mesh);projs.length=0;
   const m=MAPS[i];curMap=i;if(i!==9)camera.up.copy(UP);m.build();SPAWNS=m.nav().map(k=>NODES[k]);m.pickups();

@@ -25,7 +25,7 @@ function shotgunFeel(e,alt,start,dir){flashLight(start,0xffc070,.12,4.5,16);cons
   if(e!==player)return;vmKick=alt?1.7:2.6;vmFlashT=.09;shake=Math.max(shake,alt?.18:.32);recoilQ+=alt?.03:.065;player.vel.addScaledVector(dir,alt?-2:-4.5);}
 function fire(e,alt=false){if(isClient()){if(e===player)clientFire(alt);return;}const w=WEAPONS[e.weapon];
   if(e.ammo[w.id]<=0){if(e===player){playSnd('empty');e.cd=.3;}autoSwitch(e);return;}
-  e.ammo[w.id]--;if(e.st)e.st.shots[w.id]++;if(modeWeapon()!=null)e.ammo[w.id]=99;e.cd=alt?(w.altRate||w.rate):w.rate;if(e.invisT>0)e.invisFlickerT=.32;
+  e.recoilT=.12;e.ammo[w.id]--;if(e.st)e.st.shots[w.id]++;if(modeWeapon()!=null)e.ammo[w.id]=99;e.cd=alt?(w.altRate||w.rate):w.rate;if(e.invisT>0)e.invisFlickerT=.32;
   const eye=eyePos(e),dir=aimDir(e),mz=muzzlePos(e,dir),md=eye.distanceTo(mz),mdir=mz.clone().sub(eye).normalize();
   const start=rayLevel(a3(eye),a3(mdir),md)>=md-1e-3?mz:eye.clone();
   flashLight(start,w.color,.07,2.2,10);playSnd(w.snd,e===player?null:e.pos);nev({t:'fi',e:e.nid,w:w.id},e);
@@ -66,13 +66,13 @@ let firstBlood=false;
 const MULTI=['','','ДВОЙНОЕ УБИЙСТВО','ТРОЙНОЕ УБИЙСТВО','МЕГА-УБИЙСТВО','ЧУДОВИЩНО!'];
 const STREAK={5:'СЕРИЯ УБИЙСТВ!',10:'НЕУДЕРЖИМ!',15:'БОГОПОДОБЕН!'};
 const nm=e=>`<span style="color:${hex(teamColorFor(e))}">${e.name}</span>`;
-function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t);t.alive=false;t.deaths++;t.streak=0;t.deadT=0;gibFX(t);playSnd('death',t===player?null:t.pos);if(t===player)speakBattleLine(DEATH_LINES);nev({t:'gib',e:t.nid});
+function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t);t.alive=false;t.deaths++;t.streak=0;t.deadT=0;const over=t.health<=-35||!!(w&&w.lava)||!!(w&&w.splash&&t.health<=-15),dk=(R()*4)|0;deathFX(t,over,dk);playSnd('death',t===player?null:t.pos);if(t===player)speakBattleLine(DEATH_LINES);nev({t:'gib',e:t.nid,o:over?1:0,k:dk});
   if(gameMode==='ctf')ctfDrop(t,!!(w&&w.lava)||t.pos.y<-40);
   if(t.st&&(!att||att===t))t.st.self++;
   if(att&&att!==t&&att.st&&t.st){if(w&&w.id!=null)att.st.kills[w.id]++;else att.st.push++;att.st.vic[t.nid]=(att.st.vic[t.nid]||0)+1;t.st.by[att.nid]=(t.st.by[att.nid]||0)+1;att.st.best=Math.max(att.st.best,att.streak+1);}
   if(gameMode==='lms'&&t.lives!=null){t.lives--;if(t.lives<=0){t.out=true;}}
   if(!att||att===t){if(gameMode!=='koth')t.frags--;feed(`${nm(t)} <span class="w">[${w&&w.lava?w.name:'САМОПОДРЫВ'}]</span>`);}
-  else{if(gameMode!=='koth')att.frags++;botSay(att,'kill',t);botSay(t,'death',att);att.streak++;if(time-att.lastKill<3)att.multi++;else att.multi=1;att.lastKill=time;
+  else{if(gameMode!=='koth')att.frags++;if(att.isBot&&att.alive&&R()<.45)startTaunt(att);botSay(att,'kill',t);botSay(t,'death',att);att.streak++;if(time-att.lastKill<3)att.multi++;else att.multi=1;att.lastKill=time;
     if(gameMode==='team'&&att.team!=null)teamScores[att.team]++;
     feed(`${nm(att)} <span class="w">[${w.name}]</span> ${nm(t)}`);
     let fb=false;if(!firstBlood){firstBlood=true;fb=true;}
@@ -98,7 +98,7 @@ function updateProjs(dt){for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.l
   else{p.mesh.rotation.z+=dt*10;if(R()<.6)emit(p.pos,rv(.5),0x40ffff,.06,.25);}}}
 function impact(p,pt,hitE,d){const w=p.w;nev({t:'pe',i:p.id,w:w.id,p:a3r(w.splash?pt.clone().addScaledVector(d,-.25):pt),d:a3r(d),x:w.splash?1:0,h:hitE?1:0});if(w.splash){if(!hitE)addShotMark(pt,d,0x292327,.32);explode(pt.addScaledVector(d,-.25),w,p.owner,hitE);}
   else{if(hitE){kick(hitE,d.clone().multiplyScalar(w.knock));damage(hitE,w.dmg,p.owner,w);bloodFX(pt,d);}else{sparkFX(pt,w.color);addShotMark(pt,d,0x292327,.28);}flashLight(pt,w.color,.15,1.5,6);playSnd('zap',pt);}}
-function explode(pt,w,owner,direct){explosionFX(pt);playSnd('boom',pt);
+function explode(pt,w,owner,direct){explosionFX(pt);playSnd('boom',pt);corpseBlast(pt,(w.splash||4)*.9);
   for(const e of ents){if(!e.alive||sameTeam(owner,e))continue;const up=entityUp(e),c=e.pos.clone().addScaledVector(up,e.h/2);const dist=c.distanceTo(pt);let dmg=0;
     if(e===direct)dmg=w.dmg;else if(dist<w.splash){const dd=c.clone().sub(pt),L=dd.length();dd.normalize();if(rayLevel(a3(pt),a3(dd),L)<L-.1)continue;dmg=w.dmg*(1-dist/w.splash)*.9;}else continue;
     const kd=c.clone().sub(pt).addScaledVector(up,.5).normalize();const kf=Math.max(0,1-dist/(w.splash*1.2));kick(e,kd.clone().multiplyScalar(kf*w.knock*(e===owner?1:.7)));if(!e.remote)e.grounded=false;

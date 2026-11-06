@@ -69,6 +69,7 @@ function onHostData(c,d){const e=c.ent;
   else if(d.t==='f'){if(!e.alive||!e.owned[d.w]||e.ammo[d.w]<=0)return;e.yaw=d.y;e.pitch=d.pi;e.weapon=d.w;if(d.d)e.forceDir=d.d;fire(e,!!d.alt);}
   else if(d.t==='rs'){if(!e.alive&&!e.out&&(e.deadT||0)>1)spawnEntity(e);}
   else if(d.t==='rsw')useReactorSwitch(e,d.i);
+  else if(d.t==='tn')startTaunt(e,d.k|0);
   else if(d.t==='chat')postChat(e,d.m);
   else if(d.t==='bye')c.bye=true;
   else if(d.t==='po'&&typeof d.c==='number')e.ping=Math.max(0,Math.round(performance.now()-d.c));}
@@ -142,14 +143,15 @@ function clientEvent(v){const V=a=>new V3(a[0],a[1],a[2]);switch(v.t){
   case'rd':setReactorDark(!!v.d,false);break;
   case'rw':pickMsg('РЕАКТОР ЗАРЯЖАЕТСЯ — УХОДИ ИЗ ЦЕНТРА!');playSnd('thunder');break;
   case'rp':flashLight(new V3(0,4,0),0xff3018,.45,4,32);playSnd('thunder');if(camera.position.length()<20)shake=Math.max(shake,.45);break;
-  case'fi':{const e=NET.byNid.get(v.e);if(e&&e.invisT>0)e.invisFlickerT=.32;if(e&&e!==player){playSnd(WEAPONS[v.w].snd,e.pos);flashLight(eyePos(e),WEAPONS[v.w].color,.07,2.2,10);}break;}
+  case'fi':{const e=NET.byNid.get(v.e);if(e)e.recoilT=.12;if(e&&e.invisT>0)e.invisFlickerT=.32;if(e&&e!==player){playSnd(WEAPONS[v.w].snd,e.pos);flashLight(eyePos(e),WEAPONS[v.w].color,.07,2.2,10);}break;}
   case'pj':{const w=WEAPONS[v.w],pos=V(v.p),vel=V(v.v),m=makeProjMesh(w);m.position.copy(pos);m.lookAt(pos.clone().add(vel));scene.add(m);cprojs.push({id:v.i,pos,vel,w,mesh:m,life:5});break;}
   case'pr':{const p=cprojs.find(x=>x.id===v.i);if(p){p.pos.copy(V(v.p));p.vel.copy(V(v.v));p.mesh.position.copy(p.pos);p.mesh.lookAt(p.pos.clone().add(p.vel));}break;}
   case'pe':{const i=cprojs.findIndex(p=>p.id===v.i);if(i>=0){scene.remove(cprojs[i].mesh);cprojs.splice(i,1);}const pt=V(v.p);
-    if(v.x){if(!v.h)addShotMark(pt,v.d?V(v.d):new V3(0,0,1),0x292327,.25);explosionFX(pt);playSnd('boom',pt);const pd=camera.position.distanceTo(pt);if(pd<18)shake=Math.max(shake,(1-pd/18)*.6);}else{if(v.h)bloodFX(pt,UP);else{sparkFX(pt,WEAPONS[v.w].color);addShotMark(pt,new V3(0,0,1),0x292327,.22);}playSnd('zap',pt);}break;}
+    if(v.x){if(!v.h)addShotMark(pt,v.d?V(v.d):new V3(0,0,1),0x292327,.25);explosionFX(pt);corpseBlast(pt,4);playSnd('boom',pt);const pd=camera.position.distanceTo(pt);if(pd<18)shake=Math.max(shake,(1-pd/18)*.6);}else{if(v.h)bloodFX(pt,UP);else{sparkFX(pt,WEAPONS[v.w].color);addShotMark(pt,new V3(0,0,1),0x292327,.22);}playSnd('zap',pt);}break;}
   case'hs':{const w=WEAPONS[v.w],a=V(v.a),b=V(v.b);if(w.type==='rail')railFX(a,b,w.color);else beam(a,b,w.color,.06,.018);if(v.h)bloodFX(b,UP);else{sparkFX(b,w.color);if(a.distanceTo(b)<249)addShotMark(b,b.clone().sub(a).normalize(),0x202329,.13);}break;}
-  case'gib':{const e=NET.byNid.get(v.e);if(e){addBloodStain(e.pos);gibFX(e);playSnd('death',e===player?null:e.pos);if(e===player)speakBattleLine(DEATH_LINES);if(e.mesh)e.mesh.group.visible=false;}break;}
+  case'gib':{const e=NET.byNid.get(v.e);if(e){deathFX(e,!!v.o,v.k);playSnd('death',e===player?null:e.pos);if(e===player)speakBattleLine(DEATH_LINES);if(e.mesh)e.mesh.group.visible=false;}break;}
   case'sp':{const e=NET.byNid.get(v.e);if(e&&e!==player){const c=V(v.p);c.y+=1;for(let i=0;i<20;i++)emit(c.clone().add(rv(1.2)),new V3(0,2+R()*3,0),0x80e0ff,.1,.8);playSnd('respawn',c);}else if(e===player&&e.deaths>0)speakBattleLine(RESPAWN_LINES);break;}
+  case'tn':{const e=NET.byNid.get(v.e);if(e&&e!==player)startTaunt(e,v.k);break;}
   case'fd':feed(v.h,v.l||6);break;
   case'ch':chatLine(v.h);playSnd('switch');break;
   case'ann':announce(v.s);break;
