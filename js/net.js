@@ -59,7 +59,7 @@ function onHostData(c,d){const e=c.ent;
     if(state==='end')c.dc.send({t:'s',mt:0,gm:gameMode,ts:teamScores.slice(),e:[],pk:'',am:ne.ammo,ow:ne.owned,ev:[{t:'end',w:sorted()[0].nid,team:teamScores[0]===teamScores[1]?null:teamScores[0]>teamScores[1]?0:1,ts:teamScores.slice(),st:matchSummary()}]});
     feed(`${nm(ne)} <span class="w">вернулся в игру</span>`);updateNetInfo();return;}}
   if(d.t==='hello'){if(c.ent)return;const used=new Set(ents.map(x=>x.color));const col=HUMAN_COLORS.find(x=>!used.has(x))||0xffffff;
-    const ne=makeEntity(String(d.name||'Друг').slice(0,10),col,false);ne.remote=true;ne.tok=d.tok||null;ne.conn=c;ne.mesh=makeBotMesh(col);ne.mesh.group.visible=false;assignNid(ne);c.ent=ne;NET.conns.push(c);
+    const ne=makeEntity(String(d.name||'Друг').slice(0,10),col,false);ne.remote=true;ne.tok=d.tok||null;ne.conn=c;ne.mesh=makeBotMesh(col,ne.name);ne.mesh.group.visible=false;assignNid(ne);c.ent=ne;NET.conns.push(c);
     if(state==='menu'||state==='end'){lobbyLog(`${nm(ne)} <span class="w">присоединился</span>`);broadcastLobby();return;}
     ents.splice(1+NET.conns.length-1,0,ne);assignBalancedTeam(ne);if(gameMode==='lms'&&state!=='intro'){ne.lives=0;ne.out=true;}else{ne.lives=gameMode==='lms'?LMS_LIVES:null;spawnEntity(ne);}
     c.dc.send({t:'init',map:curMap,mode:gameMode,teamScores,intro:state==='intro',nid:ne.nid,roster:roster(),mt:matchTime,br:BRIDGES.map(b=>b.broken?1:0),rt:curMap===7?REACTOR.timer:null,rd:curMap===7?(REACTOR.dark?1:0):null,st:curMap===8?SHIP.timer:null,swv:curMap===8?SHIP.waveT:null,swi:curMap===8?SHIP.waveId:null});nev({t:'roster',r:roster()},ne);
@@ -105,7 +105,7 @@ function netSend(o){if(NET.dc&&NET.dc.open){try{NET.dc.send(o);}catch(e){}}}
 function applyRoster(r){const keep=new Set();const list=[];
   for(const it of r){keep.add(it.n);let e;
     if(it.n===NET.myNid){e=player;player.nid=it.n;player.name=it.nm;player.color=it.c;}
-    else{e=NET.byNid.get(it.n);if(!e||e===player){e=makeEntity(it.nm,it.c,it.b);e.nid=it.n;e.mesh=makeBotMesh(it.c);e.tpos=new V3();}}
+    else{e=NET.byNid.get(it.n);if(!e||e===player){e=makeEntity(it.nm,it.c,it.b);e.nid=it.n;e.mesh=makeBotMesh(it.c,it.nm);e.tpos=new V3();}}
     e.team=it.t==null?null:it.t;applyTeamAppearance(e);NET.byNid.set(it.n,e);list.push(e);}
   for(const [n,e] of [...NET.byNid]){if(!keep.has(n)){if(e.mesh)scene.remove(e.mesh.group);NET.byNid.delete(n);}}
   ents=list;}
