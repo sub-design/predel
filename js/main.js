@@ -18,7 +18,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
   if(isClient()){if(state!=='menu')clientUpdate(dt);}
   else if(state==='play'||state==='intro'||state==='menu'||(state==='paused'&&isHost()))update(dt);
   if(isHost())netTick(dt);
-  updateParticles(dt);updateFX(dt);updateWeather(dt);
+  updateParticles(dt);updateGibs(dt);updateFX(dt);updateWeather(dt);
   for(const L of LPOOL){L.t-=dt;L.l.intensity=L.t>0?L.i*(L.t/L.max):0;}
   for(const f of flames){const u=f.userData,k=1+Math.sin(time*13+u.ph)*.12+Math.sin(time*7.3+u.ph*2)*.08;f.scale.set(.8*u.s*k,1.5*u.s*(2-k),1);}
   if(curMap===1){texLava.offset.y=(texLava.offset.y+dt*.04)%1;texLava.offset.x=Math.sin(time*.3)*.05;if(R()<dt*20)emit(new V3((R()-.5)*7,-.5,(R()-.5)*48),new V3((R()-.5),2+R()*3,(R()-.5)),R()<.5?0xff5000:0xffb020,.1,1.2,-.5);}
@@ -32,6 +32,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
     if(state==='play'){updateVM(dt);updateHUD(dt);}}
   skyMesh.position.copy(camera.position);if(curMap===2)skyMesh.rotation.y+=dt*.006;if(curMap===6){scene.fog.near=3;scene.fog.far=27+Math.sin(time*.45)*3;if(state==='play'&&player.alive&&R()<dt*26){const p=player.pos.clone().add(new V3((R()-.5)*34,7+R()*10,(R()-.5)*34));emit(p,new V3((R()-.5)*1.5,-3-R()*3,(R()-.5)*1.5),0xe9f7ff,.045,2.8);}}if(curMap===8&&state==='play'&&player.alive){if(R()<dt*85){const p=player.pos.clone().add(new V3((R()-.5)*42,12+R()*15,(R()-.5)*42));emit(p,new V3((R()-.5)*1.5,-13-R()*5,(R()-.5)*1.5),0xb6d5e5,.035,1.3); }if(R()<dt*.025)flashLight(new V3(player.pos.x+(R()-.5)*45,18,player.pos.z-35),0xdbeeff,.11,4,70);}updateWaterView();
   retroMaterial.uniforms.uRetro.value=retroMode?1:0;retroMaterial.uniforms.uTime.value=time;
+  updateMirrors();updateVmChrome();
   if(retroMode){renderer.setRenderTarget(retroTarget);renderer.clear();renderer.render(scene,camera);if((state==='play'||state==='paused')&&player.alive){renderer.clearDepth();renderer.render(vmScene,vmCam);}renderer.setRenderTarget(null);renderer.clear();renderer.render(retroScene,retroCamera);}
   else{renderer.setRenderTarget(null);renderer.clear();renderer.render(scene,camera);if((state==='play'||state==='paused')&&player.alive){renderer.clearDepth();renderer.render(vmScene,vmCam);}}
   if(screenshotPending){screenshotPending=false;saveScreenshot();}}

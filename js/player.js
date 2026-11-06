@@ -1,7 +1,7 @@
 // ПРЕДЕЛ — Local player controls and the first-person viewmodel.
 'use strict';
 /* ---------- player ---------- */
-const RESPAWN_AUTO=3;const keys={};let mouseDown=false,mouseAltDown=false,deadT=0,dmgFlash=0,hitMarker=0,shake=0,vmKick=0,vmFlashT=0,bobPh=0,spinV=0,swayX=0,swayY=0;
+const RESPAWN_AUTO=3;const keys={};let mouseDown=false,mouseAltDown=false,deadT=0,dmgFlash=0,hitMarker=0,shake=0,vmKick=0,recoilQ=0,vmFlashT=0,bobPh=0,spinV=0,swayX=0,swayY=0;
 const lastTap={};
 function updatePlayer(dt){
   const zooming=player.weapon===6&&mouseAltDown;camera.fov+=((zooming?32:SET.fov)-camera.fov)*Math.min(1,dt*12);camera.updateProjectionMatrix();
@@ -17,11 +17,11 @@ function dodge(code){if(state!=='play'||!player.alive||!player.grounded)return;c
 
 /* ---------- viewmodel ---------- */
 const vmRoot=new THREE.Group();vmRoot.scale.setScalar(.72);vmScene.add(vmRoot);vmScene.add(vmCam);
-const vmModels=WEAPONS.map(w=>{const m=makeWeaponModel(w.id);m.visible=false;vmRoot.add(m);return m;});
+const vmModels=WEAPONS.map(w=>{const m=makeWeaponModel(w.id);chrome(m,.38,texVmChrome);m.visible=false;vmRoot.add(m);return m;});
 const vmFlash=new THREE.Sprite(new THREE.SpriteMaterial({map:texFlash,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));vmFlash.scale.setScalar(.3);vmRoot.add(vmFlash);
 function updateVM(dt){const w=player.weapon;for(const model of vmModels)model.traverse(o=>{if(!o.isMesh)return;const mats=Array.isArray(o.material)?o.material:[o.material];for(const mat of mats)if(mat.emissive){if(mat.userData.baseEmissive==null)mat.userData.baseEmissive=mat.emissive.getHex();mat.emissive.setHex(player.doubleT>0?0x9b1800:mat.userData.baseEmissive);}});vmModels.forEach((m,i)=>m.visible=i===w);const m=vmModels[w];
   const hs=Math.hypot(player.vel.x,player.vel.z);if(player.grounded)bobPh+=dt*hs*.9;const bk=Math.min(1,hs/11)*(player.grounded?1:.2);
-  vmKick=Math.max(0,vmKick-dt*8);swayX*=Math.pow(.001,dt);swayY*=Math.pow(.001,dt);
+  vmKick=Math.max(0,vmKick-dt*8);if(recoilQ>0){const k=Math.min(recoilQ,dt*1.4);player.pitch=Math.min(1.5,player.pitch+k);recoilQ-=k;}swayX*=Math.pow(.001,dt);swayY*=Math.pow(.001,dt);
   const sw=Math.max(0,player.switchT)/.25;
   vmRoot.position.set(.3+Math.sin(bobPh)*.014*bk+swayX,-.3-Math.abs(Math.cos(bobPh))*.016*bk-sw*.35+swayY,-.55+vmKick*.07);
   vmRoot.rotation.set(vmKick*.12,0,0);

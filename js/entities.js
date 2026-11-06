@@ -13,7 +13,7 @@ function makeBotMesh(color){
   const arm=x=>{const p=new THREE.Group();p.position.set(x,1.45,0);g.add(p);B(.16,.55,.16,dark,0,-.28,0,p);return p;};
   const armL=arm(-.42),armR=arm(.42);B(.1,.5,.12,gunM,0,-.62,-.06,armR);B(.06,.06,.06,new THREE.MeshBasicMaterial({color}),0,-.88,-.06,armR);
   const leg=x=>{const p=new THREE.Group();p.position.set(x,.8,0);g.add(p);B(.2,.8,.24,dark,0,-.4,0,p);B(.22,.25,.26,mat,0,-.2,-.02,p);return p;};
-  const legL=leg(-.15),legR=leg(.15),shield=new THREE.Mesh(new THREE.SphereGeometry(.82,10,8),new THREE.MeshBasicMaterial({color:0x40dfff,wireframe:true,transparent:true,opacity:.28,depthWrite:false}));shield.scale.set(.8,1.2,.8);shield.visible=false;g.add(shield);scene.add(g);g.visible=false;return{group:g,mat,gunM,shield,head,armL,armR,legL,legR};}
+  const legL=leg(-.15),legR=leg(.15),shield=new THREE.Mesh(new THREE.SphereGeometry(.82,10,8),new THREE.MeshBasicMaterial({color:0x40dfff,wireframe:true,transparent:true,opacity:.28,depthWrite:false}));shield.scale.set(.8,1.2,.8);shield.visible=false;g.add(shield);chrome(g,.16);scene.add(g);g.visible=false;return{group:g,mat,gunM,shield,head,armL,armR,legL,legR};}
 function applyTeamAppearance(e){if(e.mesh&&e.mesh.mat)e.mesh.mat.color.setHex(teamColorFor(e));}
 const player=makeEntity('Игрок',0xffffff,false);
 const BOT_DEFS=[['Вектор',0xd03030,'sniper'],['Оса',0xe0c020,'rush'],['Гранит',0x3070e0,'rocket'],['Нова',0x30c050,'collector'],['Крюк',0xc040c0,'coward']];

@@ -6,7 +6,7 @@
 // Логин/пароль TURN вводятся в меню (хранятся только в этом браузере) или приходят в ссылке-приглашении после '#'.
 const TURN_URLS=['turn:global.relay.metered.ca:80','turn:global.relay.metered.ca:80?transport=tcp','turn:global.relay.metered.ca:443','turns:global.relay.metered.ca:443?transport=tcp'];
 const LS={get(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
-const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1'};
+const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1',refl:LS.get('predel.refl')!=='0',gibs:LS.get('predel.gibs')===''?1:Math.max(0,Math.min(2,+LS.get('predel.gibs')|0))};
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE_WEAPON={insta:3,rocket:2},modeWeapon=()=>MODE_WEAPON[gameMode];
 const MODE_LIMIT={duel:10,koth:60,lms:9999,ctf:3},fragLimit=()=>MODE_LIMIT[gameMode]||FRAG_LIMIT,LMS_LIVES=3;
@@ -170,7 +170,7 @@ function clientEnd(result){state='end';let title,voice;
 function clientFire(alt=false){const w=WEAPONS[player.weapon];
   if(player.ammo[w.id]<=0){playSnd('empty');player.cd=.3;autoSwitch(player);return;}
   player.ammo[w.id]--;if(modeWeapon()!=null)player.ammo[w.id]=99;player.cd=alt?(w.altRate||w.rate):w.rate;vmKick=1;vmFlashT=.05;playSnd(w.snd);
-  const eye=eyePos(player),dir=aimDir(player),start=muzzlePos(player,dir);flashLight(start,w.color,.07,2.2,10);
+  const eye=eyePos(player),dir=aimDir(player),start=muzzlePos(player,dir);flashLight(start,w.color,.07,2.2,10);if(w.type==='shotgun')shotgunFeel(player,alt,start,dir);
   if(w.type!=='proj'){const d=dir.clone();if(w.type==='shotgun'&&alt)d.add(rv(w.altSpread*2)).normalize();else if(w.id===1&&alt){}else if(w.spread)d.add(rv(w.spread*2)).normalize();const o=a3(eye),da=a3(d),tl=rayLevel(o,da,250),h=rayEnts(o,da,tl,player),end=eye.clone().addScaledVector(d,h?h.t:tl);
     if(w.type==='rail')railFX(start,end,w.color);else beam(start,end,w.color,.06,.018);if(h)bloodFX(end,d);else if(tl<250)sparkFX(end,w.color);
     netSend({t:'f',y:player.yaw,pi:player.pitch,w:w.id,d:[d.x,d.y,d.z],alt:!!alt});}

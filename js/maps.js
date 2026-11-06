@@ -53,6 +53,8 @@ function buildBastion(){
     box(A-1.6,6.3,t-.4,A-1,6.7,t+.4,matTrim,1,false);flame(A-1.3,7.3,t);}
   // central platform + stairs
   box(-7,0,-7,7,2.8,7,matStone);box(-7.2,2.8,-7.2,7.2,3,7.2,matPlate);
+  // Polished marble around and on top of the dais: the arena's showcase mirror floor.
+  mirrorFloor(-16,-16,16,16,0,0xd8ccff,.34);mirrorFloor(-7.2,-7.2,7.2,7.2,3,0xc8e4ff,.4);
   for(let i=1;i<=6;i++){box(-2,0,13-i,2,.5*i,14-i,matTrim,2);box(-2,0,-(14-i),2,.5*i,-(13-i),matTrim,2);}
   for(const sx of [-1,1])for(const sz of [-1,1]){
     box(sx*6.2-.3,3,sz*6.2-.3,sx*6.2+.3,4.6,sz*6.2+.3,matPillar,1);
@@ -262,7 +264,7 @@ function buildMegapolis(){
   // East office tower: collision walls leave a wide south-facing entrance.
   box(12,-.5,-18,32,0,4,matFloor,3);box(12,-1,-18,12.8,8,-17.2,matWall);box(31.2,-1,-18,32,8,4,matWall);box(12,-1,-18,32,8,-17.2,matWall);
   box(12,-1,3.2,18,8,4,matWall);box(26,-1,3.2,32,8,4,matWall);box(18,6.5,3.2,26,8,4,matWall);
-  box(12,8,-18,32,8.8,4,matPlate,3);
+  box(12,8,-18,32,8.8,4,matPlate,3);mirrorFloor(12.8,-17.2,31.2,3.2,0,0xc8d8ff,.38);
   // Desks, partitions and luminous monitors make this lower floor a close-range combat route.
   for(const [x,z] of [[16,-12],[21,-12],[27,-12],[16,-5],[27,-5],[16,0],[27,0]]){box(x,0,z,x+2.2,1.05,z+.9,matCrate,2);const screen=new THREE.Mesh(new THREE.BoxGeometry(.9,.65,.08),new THREE.MeshBasicMaterial({color:(x+z)%2?0x38dfff:0xff4bce}));screen.position.set(x+1.1,1.65,z+.35);LV.add(screen);}
   box(19,0,-9,20,3,-6,matPillar,2);box(24,0,-9,25,3,-6,matPillar,2);
@@ -279,6 +281,8 @@ function buildMegapolis(){
   const cable=(a,b,c)=>{const d=b.clone().sub(a),m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,d.length(),5),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.62}));m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(UP,d.normalize());LV.add(m);};
   cable(new V3(-16,14,-4),new V3(14,11,-5),0x49dfff);cable(new V3(4,12,15),new V3(3,8,-17),0xff48bc);
   for(const [x,z,w,d,h] of [[-56,-38,14,14,42],[40,-48,16,20,58],[-53,18,18,16,50],[42,20,16,18,38]])box(x,-22,z,x+w,h,z+d,matWall,8,false);
+  // Rain puddles on the rooftops reflect the neon.
+  for(const [x,y,z,r] of [[-28,12.2,1,2.2],[-21,12.2,-11,1.6],[-25,12.2,12,1.8],[-4,10.2,22,1.9],[6,10.2,15,1.4],[-3,6.2,-23,1.7],[4,6.2,-18,1.2],[22,8.8,-10,2],[28,8.8,0,1.3]])puddle(x,z,y,r);
   addRoofPad(new V3(-17,12.2,0),new V3(19,8.8,-3),12,0xff52dc);
   addRoofPad(new V3(15,8.8,-8),new V3(2,10.2,18),9,0x44dfff);
   addRoofPad(new V3(0,10.2,12),new V3(0,6.2,-20),17,0xffc044);
@@ -295,7 +299,7 @@ function buildGlacier(){
   for(const [x,z] of [[-27,-22],[27,-22],[-27,22],[27,22]]){box(x-2,0,z-2,x+2,7,z+2,matPillar,2);box(x-2.5,7,z-2.5,x+2.5,7.8,z+2.5,matPlate,2);}
   // Broad ice patches are visible and physically slippery.
   for(const [x0,z0,x1,z1] of [[-15,-13,15,13],[-30,-16,-19,-7],[19,7,30,16]]){
-    ICE_ZONES.push({x0,z0,x1,z1});const ice=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),new THREE.MeshPhongMaterial({color:0x9ad8ee,specular:0xffffff,shininess:130,transparent:true,opacity:.55,depthWrite:false,side:THREE.DoubleSide}));ice.rotation.x=-Math.PI/2;ice.position.set((x0+x1)/2,.025,(z0+z1)/2);LV.add(ice);
+    ICE_ZONES.push({x0,z0,x1,z1});const ice=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),new THREE.MeshPhongMaterial({color:0x9ad8ee,specular:0xffffff,shininess:130,transparent:true,opacity:.55,depthWrite:false,side:THREE.DoubleSide}));ice.rotation.x=-Math.PI/2;ice.position.set((x0+x1)/2,.025,(z0+z1)/2);LV.add(ice);mirrorFloor(x0,z0,x1,z1,0,0xc4ecff,.3);
   }
   for(const [x,z,h] of [[-12,-8,1.3],[12,-8,1.3],[-12,8,1.3],[12,8,1.3],[-21,13,2],[21,-13,2]])box(x-1.4,0,z-1,x+1.4,h,z+1,matCrate,2);
   // Cave entrance through the western glacier wall, with a blue cavern at the end.
@@ -317,7 +321,7 @@ function buildReactor(){
   // The central containment hall has four doors and a pulsing reactor core.
   box(-10,0,-10,-9,7,-3,matStone);box(-10,0,3,-9,7,10,matStone);box(9,0,-10,10,7,-3,matStone);box(9,0,3,10,7,10,matStone);
   box(-9,0,-10,-3,7,-9,matStone);box(3,0,-10,9,7,-9,matStone);box(-9,0,9,-3,7,10,matStone);box(3,0,9,9,7,10,matStone);
-  box(-3,0,-3,3,.7,3,matPillar,2);
+  box(-3,0,-3,3,.7,3,matPillar,2);mirrorFloor(-9,-9,9,9,0,0xffd2c8,.38);
   const core=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.8,4.8,8),new THREE.MeshPhongMaterial({color:0x8e3020,emissive:0xff2608,emissiveIntensity:.75,shininess:80}));core.position.set(0,3.2,0);LV.add(core);REACTOR.core=core;
   const coreRing=new THREE.Mesh(new THREE.TorusGeometry(3.4,.12,6,24),new THREE.MeshBasicMaterial({color:0xff5020}));coreRing.rotation.x=Math.PI/2;coreRing.position.y=.8;LV.add(coreRing);
   REACTOR.coreLight=new THREE.PointLight(0xff3218,1.8,28,1);REACTOR.coreLight.position.set(0,4,0);LV.add(REACTOR.coreLight);REACTOR.lights.push({light:REACTOR.coreLight,normal:1.8});
@@ -426,6 +430,8 @@ function buildGhostShip(){
   // Deck is divided around two hatch openings that lead into the cramped lower hold.
   box(-30,3,-19,-8,4,19,matRust,4);box(-3,3,-19,30,4,19,matRust,4);
   box(-8,3,-19,-3,4,-9,matRust,3);box(-8,3,9,-3,4,19,matRust,3);
+  // Storm water pools on the deck plates.
+  for(const [x,z,r] of [[-20,-8,2.2],[-14,11,1.6],[-24,6,1.3],[6,-12,2],[14,7,1.8],[22,-4,1.5],[2,13,1.2]])puddle(x,z,4,r);
   box(-8,-2,-9,-3,-1,9,matGrate,2);box(-8,-2,-10,-3,1,-9,matRust,2);box(-8,-2,9,-3,1,10,matRust,2);
   box(-25,-1,-6,-24,2,6,matRust,2);box(23,-1,-6,24,2,6,matRust,2);
   // Raised bridge and stern cabin create distinct high ground and sniper sight lines.
@@ -582,11 +588,11 @@ let LV=null,decalGroup=null,curMap=-1,selMap=0,waterViewOn=false;const decals=[]
 function updateWaterView(){const w=curMap===4&&WATER_ZONES.find(z=>player.pos.x>z.x0&&player.pos.x<z.x1&&player.pos.z>z.z0&&player.pos.z<z.z1);const wet=!!(w&&state==='play'&&player.alive&&player.pos.y+1.6<w.surface);if(wet===waterViewOn)return;waterViewOn=wet;$('waterfx').style.opacity=wet?'.85':'0';if(curMap===4){scene.fog.color.setHex(wet?0x143c56:MAPS[curMap].fog);scene.background.setHex(wet?0x143c56:MAPS[curMap].fog);}if(sfxFilter&&AC)sfxFilter.frequency.setTargetAtTime(wet?850:22000,AC.currentTime,.12);}
 function loadMap(i){
   if(LV){scene.remove(LV);LV.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
-  LV=new THREE.Group();scene.add(LV);decalGroup=new THREE.Group();LV.add(decalGroup);decals.length=0;
+  LV=new THREE.Group();scene.add(LV);decalGroup=new THREE.Group();LV.add(decalGroup);decals.length=0;if(typeof clearGibs==='function')clearGibs();resetMirrors();
   solids.length=0;flames.length=0;padCones.length=0;PADS.length=0;PICKUPS.length=0;WATER_ZONES.length=0;BRIDGES.length=0;ICE_ZONES.length=0;lavaZones=[];
   for(const p of projs)scene.remove(p.mesh);projs.length=0;
   const m=MAPS[i];curMap=i;if(i!==9)camera.up.copy(UP);m.build();SPAWNS=m.nav().map(k=>NODES[k]);m.pickups();
-  scene.fog.color.setHex(m.fog);scene.fog.near=m.near;scene.fog.far=m.far;scene.background.setHex(m.fog);skyMesh.material.color.setHex(m.sky);
+  scene.fog.color.setHex(m.fog);scene.fog.near=m.near;scene.fog.far=m.far;scene.background.setHex(m.fog);skyMesh.material.color.setHex(m.sky);paintChrome(m.sky,m.fog);
   for(const b of bots){b.path=null;b.target=null;}}
 function bfs(s,g){if(s===g)return[g];const prev=new Array(NODES.length).fill(-1);prev[s]=s;const q=[s];while(q.length){const n=q.shift();for(const m of ADJ[n])if(prev[m]<0){prev[m]=n;if(m===g){const path=[m];let c=n;while(c!==s){path.unshift(c);c=prev[c];}return path;}q.push(m);}}return null;}
 function nearestNode(p){let best=0,bd=1e9;for(let i=0;i<NODES.length;i++){const n=NODES[i],d=Math.hypot(n.x-p.x,n.z-p.z)+Math.abs(n.y-p.y)*3;if(d<bd){bd=d;best=i;}}return best;}

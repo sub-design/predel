@@ -14,7 +14,10 @@ function playSnd(name,pos){if(!AC||muted)return;const dst=out(pos);if(!dst)retur
   case'blaster':tone(dst,'square',1400,300,.14,.16);noiz(dst,'highpass',3000,1500,.06,.2);break;
   case'shred':noiz(dst,'bandpass',2200,900,.07,.55,.8);tone(dst,'square',160,80,.05,.12);break;
   case'power':tone(dst,'sine',520,1250,.2,.28);tone(dst,'sawtooth',220,880,.3,.2,.06);break;
-  case'shotgun':noiz(dst,'lowpass',1800,180,.2,.85);tone(dst,'sawtooth',120,45,.18,.35);break;
+  case'shotgun':// crack + blast + chest thump + rolling tail, then the pump: chk-chk
+    noiz(dst,'highpass',6000,2500,.035,1.1);noiz(dst,'lowpass',7000,500,.32,1.25,.7);noiz(dst,'bandpass',1400,300,.18,.9,.8);
+    tone(dst,'sine',140,34,.32,1.05);tone(dst,'triangle',75,30,.4,.55);noiz(dst,'lowpass',900,90,1.1,.32,1,.05);
+    noiz(dst,'bandpass',2600,1800,.045,.42,7,.42);tone(dst,'square',780,520,.03,.07,.42);noiz(dst,'bandpass',1900,1300,.06,.5,7,.56);tone(dst,'square',600,380,.035,.08,.56);break;
   case'rocket':noiz(dst,'lowpass',1800,200,.45,.6);tone(dst,'sawtooth',220,60,.3,.2);break;
   case'thunder':noiz(dst,'lowpass',520,42,1.8,.8);tone(dst,'sine',72,30,1.6,.38,.12);break;
   case'boom':noiz(dst,'lowpass',1200,60,1.1,1.2);tone(dst,'sine',90,25,.8,.8);break;

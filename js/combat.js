@@ -20,13 +20,16 @@ function spawnProj(e,pos,dir,w){const m=makeProjMesh(w);
   m.position.copy(pos);scene.add(m);const vel=dir.clone().multiplyScalar(w.speed);m.lookAt(pos.clone().add(vel));const id=NET.projSeq++;projs.push({id,owner:e,pos:pos.clone(),vel,w,life:w.fuse||5,mesh:m});
   nev({t:'pj',i:id,w:w.id,p:a3r(pos),v:a3r(vel)});}
 
+// Кувалда should feel like a sledgehammer: big flash, smoke, view kick and a shove backwards.
+function shotgunFeel(e,alt,start,dir){flashLight(start,0xffc070,.12,4.5,16);const me=e===player,sp=me?start.clone().addScaledVector(dir,1.6):start;for(let i=0;i<(alt?3:(me?5:9));i++)emit(sp,dir.clone().multiplyScalar(2+R()*3).add(rv(1.2)),0x8c8c8c,(me?.035:.1)+R()*(me?.03:.08),.45+R()*.35,-1,false,2.5);
+  if(e!==player)return;vmKick=alt?1.7:2.6;vmFlashT=.09;shake=Math.max(shake,alt?.18:.32);recoilQ+=alt?.03:.065;player.vel.addScaledVector(dir,alt?-2:-4.5);}
 function fire(e,alt=false){if(isClient()){if(e===player)clientFire(alt);return;}const w=WEAPONS[e.weapon];
   if(e.ammo[w.id]<=0){if(e===player){playSnd('empty');e.cd=.3;}autoSwitch(e);return;}
   e.ammo[w.id]--;if(e.st)e.st.shots[w.id]++;if(modeWeapon()!=null)e.ammo[w.id]=99;e.cd=alt?(w.altRate||w.rate):w.rate;if(e.invisT>0)e.invisFlickerT=.32;
   const eye=eyePos(e),dir=aimDir(e),mz=muzzlePos(e,dir),md=eye.distanceTo(mz),mdir=mz.clone().sub(eye).normalize();
   const start=rayLevel(a3(eye),a3(mdir),md)>=md-1e-3?mz:eye.clone();
   flashLight(start,w.color,.07,2.2,10);playSnd(w.snd,e===player?null:e.pos);nev({t:'fi',e:e.nid,w:w.id},e);
-  if(e===player){vmKick=1;vmFlashT=.05;}
+  if(e===player){vmKick=1;vmFlashT=.05;}if(w.type==='shotgun')shotgunFeel(e,alt,start,dir);
   if(w.type==='proj'){const shotW=alt?{...w,speed:w.altSpeed||w.speed,dmg:w.altDmg||w.dmg,splash:w.altSplash||0,knock:w.altKnock||w.knock}:w;const tl=rayLevel(a3(eye),a3(dir),300),aim=eye.clone().addScaledVector(dir,tl),base=aim.sub(start).normalize();if(w.id===2&&alt){for(const off of [-.075,0,.075]){const d=base.clone();d.x+=Math.cos(e.yaw)*off;d.z+=Math.sin(e.yaw)*off;spawnProj(e,start,d.normalize(),shotW);}}else spawnProj(e,start,base,shotW);}
   else if(w.id===3&&alt){const d=dir.clone();if(e.forceDir){d.set(e.forceDir[0],e.forceDir[1],e.forceDir[2]).normalize();e.forceDir=null;}hitscanPierce(e,eye,d,{...w,dmg:w.altDmg,headDmg:w.altHeadDmg,knock:w.altKnock},start,w.altTargets);}
   else if(w.type==='shotgun'){const pellets=alt?1:w.pellets,base=dir.clone();if(e.forceDir){base.set(e.forceDir[0],e.forceDir[1],e.forceDir[2]).normalize();e.forceDir=null;}for(let i=0;i<pellets;i++){const d=base.clone().add(rv(alt?w.altSpread:w.spread*2)).normalize();const sw=alt?{...w,dmg:w.altDmg,spread:0,type:'hitscan'}:w;hitscan(e,eye,d,sw,start);}}

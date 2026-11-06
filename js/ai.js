@@ -10,7 +10,7 @@ function pickupMesh(type){const g=new THREE.Group();let m;
   else if(POWERUPS[type]){const p=POWERUPS[type];m=new THREE.Mesh(new THREE.IcosahedronGeometry(.48,1),new THREE.MeshPhongMaterial({color:p.color,emissive:p.color,emissiveIntensity:.42,shininess:90}));const ring=new THREE.Mesh(new THREE.TorusGeometry(.68,.045,5,16),new THREE.MeshBasicMaterial({color:p.color}));ring.rotation.x=Math.PI/2;g.add(ring);}
   else{m=makeWeaponModel(type[0]==='w'?+type.slice(1):4);m.scale.setScalar(1.8);}
   g.add(m);return g;}
-function addPickup(type,node,respawn){const base=NODES[node].clone(),mesh=pickupMesh(type),up=curMap===9?(CUBE_NODE_UP[node]||UP):UP;mesh.position.copy(base);mesh.quaternion.setFromUnitVectors(UP,up);LV.add(mesh);
+function addPickup(type,node,respawn){const base=NODES[node].clone(),mesh=pickupMesh(type);chrome(mesh,type==='health'||type==='ammo'?.2:.5);const up=curMap===9?(CUBE_NODE_UP[node]||UP):UP;mesh.position.copy(base);mesh.quaternion.setFromUnitVectors(UP,up);LV.add(mesh);
   const ped=new THREE.Mesh(new THREE.CylinderGeometry(.7,.8,.15,8),matTrim);ped.position.copy(base).addScaledVector(up,.075);ped.quaternion.setFromUnitVectors(UP,up);LV.add(ped);
   PICKUPS.push({type,node,base,mesh,respawn,active:true,t:0,ph:R()*6});}
 const PICK_NAMES={health:'АПТЕЧКА +25',mega:'МЕГА-ЗДОРОВЬЕ +100',armor:'БРОНЯ +100',ammo:'ПАТРОНЫ',w2:'ГРОМОБОЙ',w3:'ИГЛА',w4:'КУВАЛДА',w5:'ГРАНАТОМЁТ',w6:'СНАЙПЕРКА',...Object.fromEntries(Object.entries(POWERUPS).map(([k,v])=>[k,v.label]))};

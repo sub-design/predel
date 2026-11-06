@@ -53,9 +53,9 @@ const fxs=[],geoSph=new THREE.SphereGeometry(1,10,8),geoCyl=new THREE.CylinderGe
 const addMat=c=>new THREE.MeshBasicMaterial({color:c,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
 function addFX(mesh,dur,upd){scene.add(mesh);fxs.push({mesh,t:0,dur,upd});upd(mesh,0);}
 function updateFX(dt){for(let i=fxs.length-1;i>=0;i--){const f=fxs[i];f.t+=dt;const k=f.t/f.dur;if(k>=1){scene.remove(f.mesh);f.mesh.material.dispose();fxs.splice(i,1);}else f.upd(f.mesh,k);}}
-function addDecal(mesh){if(!decalGroup)return;decalGroup.add(mesh);decals.push(mesh);while(decals.length>100){const old=decals.shift();decalGroup.remove(old);old.geometry.dispose();old.material.dispose();}}
+function addDecal(mesh){if(!decalGroup)return;decalGroup.add(mesh);decals.push(mesh);while(decals.length>160){const old=decals.shift();decalGroup.remove(old);old.geometry.dispose();old.material.dispose();}}
 function addShotMark(p,d,color=0x22252a,r=.16){const normal=d.clone().negate().normalize(),mesh=new THREE.Mesh(new THREE.CircleGeometry(r,8),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.88,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2}));mesh.position.copy(p).addScaledVector(normal,.015);mesh.quaternion.setFromUnitVectors(new V3(0,0,1),normal);addDecal(mesh);}
-function addBloodStain(p){if(p.y<-1.5)return;let floor=-1e9;for(const b of solids)if(p.x>b.min[0]&&p.x<b.max[0]&&p.z>b.min[2]&&p.z<b.max[2]&&b.max[1]<=p.y+.2)floor=Math.max(floor,b.max[1]);if(floor===-1e9)return;const m=new THREE.Mesh(new THREE.CircleGeometry(.55,9),new THREE.MeshBasicMaterial({color:0x651016,transparent:true,opacity:.68,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2}));m.position.set(p.x,floor+.025,p.z);m.rotation.x=-Math.PI/2;m.scale.set(1.3,.8,1);addDecal(m);}
+function addBloodStain(p,sc=1){if(p.y<-1.5)return;let floor=-1e9;for(const b of solids)if(p.x>b.min[0]&&p.x<b.max[0]&&p.z>b.min[2]&&p.z<b.max[2]&&b.max[1]<=p.y+.2)floor=Math.max(floor,b.max[1]);if(floor===-1e9)return;const m=new THREE.Mesh(new THREE.CircleGeometry(.55,9),new THREE.MeshBasicMaterial({color:0x651016,transparent:true,opacity:.68,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2}));m.position.set(p.x,floor+.025,p.z);m.rotation.x=-Math.PI/2;m.scale.set(1.3*sc,.8*sc,1);m.rotation.z=R()*6;addDecal(m);}
 function beam(a,b,color,dur,r){const d=b.clone().sub(a),L=d.length();if(L<.01)return;const m=new THREE.Mesh(geoCyl,addMat(color));m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(UP,d.normalize());addFX(m,dur,(m,k)=>{m.material.opacity=1-k;m.scale.set(r*(1+k*2),L,r*(1+k*2));});}
 const LPOOL=[];for(let i=0;i<4;i++){const l=new THREE.PointLight(0xffffff,0,12,1);scene.add(l);LPOOL.push({l,t:0,max:1,i:0});}let lpi=0;
 function flashLight(pos,color,dur,inten,dist=12){const L=LPOOL[lpi];lpi=(lpi+1)%LPOOL.length;L.l.position.copy(pos);L.l.color.setHex(color);L.l.distance=dist;L.t=L.max=dur;L.i=inten;}
@@ -67,8 +67,42 @@ function explosionFX(p){
   flashLight(p,0xff8030,.5,4,18);}
 function sparkFX(p,color){for(let i=0;i<7;i++)emit(p,rv(8),i<3?0xffffff:color,.08,.25+R()*.2,18);}
 function bloodFX(p,d){for(let i=0;i<8;i++)emit(p,d.clone().multiplyScalar(3).add(rv(5)),0x9a1010,.12,.5,20);}
-function gibFX(e){const c=e.pos.clone();c.y+=1;for(let i=0;i<14;i++)emit(c.clone().add(new V3((R()-.5)*.6,(R()-.5)*1.4,(R()-.5)*.6)),new V3((R()-.5)*10,R()*9+2,(R()-.5)*10).addScaledVector(e.vel,.5),i<6?e.color:0x8a1010,.16+R()*.2,2.5+R(),26,true,.4);
-  for(let i=0;i<25;i++)emit(c,rv(7),0xaa1010,.09,.6,20,false,1);}
+/* ---------- gibs: body chunks that tumble, bounce off walls and bleed ---------- */
+const GMAX=160,gMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshLambertMaterial({map:texArmor}),GMAX);
+gMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);gMesh.frustumCulled=false;
+const GB=[];for(let i=0;i<GMAX;i++){GB.push({life:0,max:1,pos:new V3(),vel:new V3(),g:new V3(),rot:new THREE.Euler(),spin:new V3(),size:new V3(),rest:false,stains:0,trail:0});gMesh.setColorAt(i,_c.setHex(0xffffff));_o.scale.setScalar(0);_o.updateMatrix();gMesh.setMatrixAt(i,_o.matrix);}
+scene.add(gMesh);let gIdx=0;
+// Pieces mirror makeBotMesh: [w,h,d, x,y,z, part] where part 0 = armour colour, 1 = dark suit, 2 = meat.
+const GIB_PARTS=[[.32,.32,.32,0,1.74,0,0],[.26,.2,.36,-.44,1.48,0,0],[.26,.2,.36,.44,1.48,0,0],[.31,.36,.38,-.16,1.3,0,0],[.31,.34,.38,.16,1.05,0,0],
+  [.16,.55,.16,-.42,1.17,0,1],[.16,.55,.16,.42,1.17,0,1],[.2,.42,.24,-.15,.6,0,1],[.2,.4,.24,.15,.6,0,1],[.2,.38,.24,-.15,.2,0,1],[.2,.38,.24,.15,.2,0,1],[.5,.22,.32,0,.82,0,1]];
+const GIB_MEAT=[0x8a1010,0x6e0c12,0xa8201a];
+function spawnGib(e,w,h,d,x,y,z,color,heat,life){const i=gIdx;gIdx=(gIdx+1)%GMAX;const b=GB[i],up=entityUp(e);
+  b.size.set(w,h,d);b.pos.copy(e.pos).addScaledVector(up,y);b.pos.x+=x;b.pos.z+=z;
+  const out=new V3(x+(R()-.5)*.6,0,z+(R()-.5)*.6);if(out.lengthSq()<.01)out.set(R()-.5,0,R()-.5);out.normalize();
+  b.vel.copy(out).multiplyScalar((3+R()*5)*heat).addScaledVector(up,(4+R()*6)*heat).add(rv(3*heat)).addScaledVector(e.vel,.6);
+  const gs=curMap===9?15:(curMap>=0?(MAPS[curMap].gravity||G):G);b.g.copy(up).multiplyScalar(-gs);
+  b.rot.set(R()*6,R()*6,R()*6);b.spin.set((R()-.5)*18,(R()-.5)*18,(R()-.5)*18);b.life=b.max=life*(.8+R()*.4);b.rest=false;b.stains=0;b.trail=0;
+  gMesh.setColorAt(i,_c.setHex(color));gMesh.instanceColor.needsUpdate=true;}
+function gibFX(e){const c=e.pos.clone().addScaledVector(entityUp(e),1);for(let i=0;i<25;i++)emit(c,rv(7),0xaa1010,.09,.6,20,false,1);
+  const lvl=SET.gibs|0;if(!lvl)return;const crazy=lvl===2,heat=crazy?1.6:1,life=crazy?14:8;
+  for(const [w,h,d,x,y,z,part] of GIB_PARTS)spawnGib(e,w,h,d,x,y,z,part?0x3a3a40:e.color,heat,life);
+  const meat=crazy?22:7;for(let i=0;i<meat;i++){const s=.08+R()*(crazy?.2:.13);spawnGib(e,s,s*(.6+R()*.8),s,(R()-.5)*.5,.5+R()*1.3,(R()-.5)*.5,GIB_MEAT[i%3],heat*1.15,life*.7);}
+  if(crazy)for(let i=0;i<30;i++)emit(c,rv(14),0xaa1010,.14,1,20,true,.5);}
+const _gn=new V3(),_gAx=['x','y','z'];
+function updateGibs(dt){for(let i=0;i<GMAX;i++){const b=GB[i];if(b.life<=0){if(b.max>0){b.max=0;_o.scale.setScalar(0);_o.updateMatrix();gMesh.setMatrixAt(i,_o.matrix);}continue;}
+  b.life-=dt;if(b.pos.y<-80)b.life=0;
+  if(!b.rest){b.vel.addScaledVector(b.g,dt);const fast=b.vel.lengthSq()>16;
+    const n=Math.max(1,Math.ceil(Math.max(Math.abs(b.vel.x),Math.abs(b.vel.y),Math.abs(b.vel.z))*dt/.15)),s=dt/n;
+    for(let k=0;k<n;k++)for(let a=0;a<3;a++){const ax=_gAx[a],step=b.vel[ax]*s;if(!step)continue;_gn.copy(b.pos);_gn[ax]+=step+Math.sign(step)*Math.min(b.size.x,b.size.y,b.size.z)*.5;
+      if(!pointSolid(_gn.x,_gn.y,_gn.z)){b.pos[ax]+=step;continue;}
+      const hit=Math.abs(b.vel[ax]),onFloor=b.g[ax]*b.vel[ax]>0;b.vel[ax]*=-.38;for(const o of _gAx)if(o!==ax)b.vel[o]*=.72;b.spin.multiplyScalar(.6);
+      if(onFloor&&hit>6&&!b.stains&&curMap!==9&&R()<.6){b.stains=1;addBloodStain(b.pos.clone().add(new V3(0,.2,0)),.3+R()*.25);}
+      if(onFloor&&b.vel.lengthSq()<1.2){b.vel.set(0,0,0);b.rest=true;}}
+    b.rot.x+=b.spin.x*dt;b.rot.y+=b.spin.y*dt;b.rot.z+=b.spin.z*dt;
+    if(fast&&(b.trail-=dt)<=0){b.trail=.05;emit(b.pos,rv(.6),0x8a1010,.06,.5,10);}}
+  const k=Math.min(1,b.life/.8);_o.position.copy(b.pos);_o.rotation.copy(b.rot);_o.scale.set(b.size.x*k,b.size.y*k,b.size.z*k);_o.updateMatrix();gMesh.setMatrixAt(i,_o.matrix);}
+  gMesh.instanceMatrix.needsUpdate=true;}
+function clearGibs(){for(const b of GB)b.life=0;}
 function railFX(a,b,color){beam(a,b,color,.9,.07);beam(a,b,0xffffff,.3,.02);
   const d=b.clone().sub(a),L=d.length();d.normalize();const p1=new V3().crossVectors(d,Math.abs(d.y)>.9?new V3(1,0,0):UP).normalize(),p2=new V3().crossVectors(d,p1);
   for(let t=0;t<L&&t<80;t+=.45){const an=t*2.2,off=p1.clone().multiplyScalar(Math.cos(an)*.18).addScaledVector(p2,Math.sin(an)*.18);emit(a.clone().addScaledVector(d,t).add(off),off.clone().multiplyScalar(1.5),color,.07,.6+R()*.4,-.3);}}

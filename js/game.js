@@ -91,8 +91,8 @@ for(const id of ['tuser','tpass'])$(id).addEventListener('change',saveNetPrefs);
 buildMapCards();updateDiffRow();
 try{if(sessionStorage.getItem('predel.bye')){sessionStorage.removeItem('predel.bye');setTimeout(()=>netStatus('Хост закрыл игру или связь пропала.'),0);}}catch(e){}
 /* ---------- settings ---------- */
-function syncSettingsUI(){$('s_sens').value=SET.sens;$('v_sens').textContent=SET.sens.toFixed(2);$('s_fov').value=SET.fov;$('v_fov').textContent=SET.fov+'°';$('s_vol').value=SET.vol;$('v_vol').textContent=SET.vol+'%';$('s_inv').textContent='ИНВЕРСИЯ: '+(SET.inv?'ВКЛ':'ВЫКЛ');$('s_inv').classList.toggle('on',SET.inv);$('s_res').textContent='РАЗРЕШЕНИЕ: '+RES_H[SET.res]+'p';$('s_fx').textContent='3DFX: '+(SET.fx?'ВКЛ':'ВЫКЛ');$('s_fx').classList.toggle('on',SET.fx);$('s_flt').textContent='ТЕКСТУРЫ: '+(SET.smooth?'ГЛАДКИЕ':'ПИКСЕЛИ');$('s_mus').textContent='МУЗЫКА: '+(SET.music?'ВКЛ':'ВЫКЛ');$('s_mus').classList.toggle('on',SET.music);}
-function saveSettings(){LS.set('predel.sens',SET.sens);LS.set('predel.fov',SET.fov);LS.set('predel.vol',SET.vol);LS.set('predel.inv',SET.inv?'1':'0');LS.set('predel.mus',SET.music?'1':'0');LS.set('predel.res',SET.res);LS.set('predel.fx',SET.fx?'1':'0');LS.set('predel.flt',SET.smooth?'1':'0');if(master)master.gain.value=SET.vol/160;syncSettingsUI();}
+function syncSettingsUI(){$('s_sens').value=SET.sens;$('v_sens').textContent=SET.sens.toFixed(2);$('s_fov').value=SET.fov;$('v_fov').textContent=SET.fov+'°';$('s_vol').value=SET.vol;$('v_vol').textContent=SET.vol+'%';$('s_inv').textContent='ИНВЕРСИЯ: '+(SET.inv?'ВКЛ':'ВЫКЛ');$('s_inv').classList.toggle('on',SET.inv);$('s_res').textContent='РАЗРЕШЕНИЕ: '+RES_H[SET.res]+'p';$('s_fx').textContent='3DFX: '+(SET.fx?'ВКЛ':'ВЫКЛ');$('s_fx').classList.toggle('on',SET.fx);$('s_flt').textContent='ТЕКСТУРЫ: '+(SET.smooth?'ГЛАДКИЕ':'ПИКСЕЛИ');$('s_mus').textContent='МУЗЫКА: '+(SET.music?'ВКЛ':'ВЫКЛ');$('s_mus').classList.toggle('on',SET.music);$('s_gib').textContent='ГИБЫ: '+['ВЫКЛ','ВКЛ','БЕЗУМНО'][SET.gibs];$('s_gib').classList.toggle('on',SET.gibs>0);$('s_refl').textContent='ОТРАЖЕНИЯ: '+(SET.refl?'ВКЛ':'ВЫКЛ');$('s_refl').classList.toggle('on',SET.refl);}
+function saveSettings(){LS.set('predel.sens',SET.sens);LS.set('predel.fov',SET.fov);LS.set('predel.vol',SET.vol);LS.set('predel.inv',SET.inv?'1':'0');LS.set('predel.mus',SET.music?'1':'0');LS.set('predel.res',SET.res);LS.set('predel.fx',SET.fx?'1':'0');LS.set('predel.flt',SET.smooth?'1':'0');LS.set('predel.gibs',String(SET.gibs));LS.set('predel.refl',SET.refl?'1':'0');if(master)master.gain.value=SET.vol/160;syncSettingsUI();}
 $('s_sens').addEventListener('input',e=>{SET.sens=+e.target.value;saveSettings();});
 $('s_fov').addEventListener('input',e=>{SET.fov=+e.target.value;saveSettings();});
 $('s_vol').addEventListener('input',e=>{SET.vol=+e.target.value;saveSettings();});
@@ -103,6 +103,8 @@ $('s_res').addEventListener('click',()=>{SET.res=(SET.res+1)%RES_H.length;applyG
 $('s_fx').addEventListener('click',()=>{SET.fx=!SET.fx;applyGfx();saveSettings();});
 $('s_flt').addEventListener('click',()=>{SET.smooth=!SET.smooth;applyGfx();saveSettings();});
 $('s_mus').addEventListener('click',()=>{SET.music=!SET.music;applyGfx();saveSettings();});
+$('s_gib').addEventListener('click',()=>{SET.gibs=(SET.gibs+1)%3;saveSettings();});
+$('s_refl').addEventListener('click',()=>{SET.refl=!SET.refl;saveSettings();});
 applyGfx();
 for(const ev of ['click','mousedown'])$('settings').addEventListener(ev,e=>e.stopPropagation());
 syncSettingsUI();
