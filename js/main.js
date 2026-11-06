@@ -18,7 +18,7 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
   if(isClient()){if(state!=='menu')clientUpdate(dt);}
   else if(state==='play'||state==='intro'||state==='menu'||(state==='paused'&&isHost()))update(dt);
   if(isHost())netTick(dt);
-  updateParticles(dt);updateGibs(dt);updateCorpses(dt);updateTalkingHead(dt);updateFX(dt);updateWeather(dt);
+  updateParticles(dt);updateGibs(dt);updateCorpses(dt);updateTalkingHead(dt);updateAcoustics(dt);updateFX(dt);updateWeather(dt);
   for(const L of LPOOL){L.t-=dt;L.l.intensity=L.t>0?L.i*(L.t/L.max):0;}
   for(const f of flames){const u=f.userData,k=1+Math.sin(time*13+u.ph)*.12+Math.sin(time*7.3+u.ph*2)*.08;f.scale.set(.8*u.s*k,1.5*u.s*(2-k),1);}
   if(curMap===1){texLava.offset.y=(texLava.offset.y+dt*.04)%1;texLava.offset.x=Math.sin(time*.3)*.05;if(R()<dt*20)emit(new V3((R()-.5)*7,-.5,(R()-.5)*48),new V3((R()-.5),2+R()*3,(R()-.5)),R()<.5?0xff5000:0xffb020,.1,1.2,-.5);}

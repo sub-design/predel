@@ -184,7 +184,7 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 
 <div id="setdlg" class="overlay hidden"><div class="dlg"><div class="stitle">НАСТРОЙКИ</div><div id="setdlgbody"><div class="opts" id="settings">НАСТРОЙКИ
     <div class="row"><label>МЫШЬ <input type="range" id="s_sens" min="0.2" max="3" step="0.05"><span id="v_sens"></span></label><label>ОБЗОР <input type="range" id="s_fov" min="60" max="110" step="1"><span id="v_fov"></span></label><label>ГРОМКОСТЬ <input type="range" id="s_vol" min="0" max="100" step="5"><span id="v_vol"></span></label><button id="s_inv"></button></div>
-    <div class="row"><button id="s_res"></button><button id="s_fx"></button><button id="s_flt"></button><button id="s_mus"></button><button id="s_gib"></button><button id="s_refl"></button></div>
+    <div class="row"><button id="s_res"></button><button id="s_fx"></button><button id="s_flt"></button><button id="s_mus"></button><button id="s_gib"></button><button id="s_refl"></button><button id="s_rev"></button><button id="s_hrtf"></button></div>
   </div></div><button class="dlgclose">ГОТОВО</button></div></div>
 <div id="helpdlg" class="overlay hidden"><div class="dlg"><div class="stitle">УПРАВЛЕНИЕ</div>
   <div class="help">
@@ -202,23 +202,24 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="js/core.js?v=202611060156"></script>
-<script src="js/maps.js?v=202611060156"></script>
-<script src="js/physics.js?v=202611060156"></script>
-<script src="js/fx.js?v=202611060156"></script>
-<script src="js/reflect.js?v=202611060156"></script>
-<script src="js/audio.js?v=202611060156"></script>
-<script src="js/anim.js?v=202611060156"></script>
-<script src="js/portraits.js?v=202611060156"></script>
-<script src="js/entities.js?v=202611060156"></script>
-<script src="js/net.js?v=202611060156"></script>
-<script src="js/modes.js?v=202611060156"></script>
-<script src="js/combat.js?v=202611060156"></script>
-<script src="js/ai.js?v=202611060156"></script>
-<script src="js/player.js?v=202611060156"></script>
-<script src="js/hud.js?v=202611060156"></script>
-<script src="js/game.js?v=202611060156"></script>
-<script src="js/main.js?v=202611060156"></script>
+<script src="js/core.js?v=202611060904"></script>
+<script src="js/maps.js?v=202611060904"></script>
+<script src="js/physics.js?v=202611060904"></script>
+<script src="js/fx.js?v=202611060904"></script>
+<script src="js/reflect.js?v=202611060904"></script>
+<script src="js/acoustics.js?v=202611060904"></script>
+<script src="js/audio.js?v=202611060904"></script>
+<script src="js/anim.js?v=202611060904"></script>
+<script src="js/portraits.js?v=202611060904"></script>
+<script src="js/entities.js?v=202611060904"></script>
+<script src="js/net.js?v=202611060904"></script>
+<script src="js/modes.js?v=202611060904"></script>
+<script src="js/combat.js?v=202611060904"></script>
+<script src="js/ai.js?v=202611060904"></script>
+<script src="js/player.js?v=202611060904"></script>
+<script src="js/hud.js?v=202611060904"></script>
+<script src="js/game.js?v=202611060904"></script>
+<script src="js/main.js?v=202611060904"></script>
 <script>for(const [k,f] of [['navaudit','nav-audit'],['smoke','smoke']])if(new RegExp('[?&]'+k).test(location.search)){const s=document.createElement('script');s.src='tools/'+f+'.js';document.body.append(s);}</script>
 </body>
 </html>

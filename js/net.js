@@ -6,7 +6,7 @@
 // Логин/пароль TURN вводятся в меню (хранятся только в этом браузере) или приходят в ссылке-приглашении после '#'.
 const TURN_URLS=['turn:global.relay.metered.ca:80','turn:global.relay.metered.ca:80?transport=tcp','turn:global.relay.metered.ca:443','turns:global.relay.metered.ca:443?transport=tcp'];
 const LS={get(k){try{return localStorage.getItem(k)||'';}catch(e){return'';}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
-const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1',refl:LS.get('predel.refl')!=='0',gibs:LS.get('predel.gibs')===''?1:Math.max(0,Math.min(2,+LS.get('predel.gibs')|0))};
+const SET={sens:+LS.get('predel.sens')||1,fov:+LS.get('predel.fov')||75,vol:LS.get('predel.vol')===''?80:+LS.get('predel.vol'),inv:LS.get('predel.inv')==='1',music:LS.get('predel.mus')!=='0',res:LS.get('predel.res')===''?1:+LS.get('predel.res'),fx:LS.get('predel.fx')==='1',smooth:LS.get('predel.flt')==='1',refl:LS.get('predel.refl')!=='0',reverb:LS.get('predel.rev')!=='0',hrtf:LS.get('predel.hrtf')!=='0',gibs:LS.get('predel.gibs')===''?1:Math.max(0,Math.min(2,+LS.get('predel.gibs')|0))};
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE_WEAPON={insta:3,rocket:2},modeWeapon=()=>MODE_WEAPON[gameMode];
 const MODE_LIMIT={duel:10,koth:60,lms:9999,ctf:3},fragLimit=()=>MODE_LIMIT[gameMode]||FRAG_LIMIT,LMS_LIVES=3;
