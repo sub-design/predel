@@ -19,7 +19,7 @@ function hillStatus(){if(hillHolder===0)return'ВЫСОТА СВОБОДНА';if
 /* capture the flag */
 let CTF=null;
 // Hand-picked opposite bases where the automatic farthest-pair choice lands on walls, bridges or a cramped hub.
-const CTF_BASES={0:[23,24],2:[2,4],4:[1,2],5:[15,16],6:[3,4],9:[5,8]};
+const CTF_BASES={0:[23,24],2:[2,4],4:[1,2],5:[15,16],6:[3,4],9:[5,8],10:[6,8]};
 function ctfDist(a){const N=NODES.length,d=new Array(N).fill(1e9),done=new Array(N).fill(false);d[a]=0;for(let k=0;k<N;k++){let u=-1;for(let i=0;i<N;i++)if(!done[i]&&(u<0||d[i]<d[u]))u=i;if(u<0||d[u]>=1e9)break;done[u]=true;for(const v of ADJ[u]){const nd=d[u]+NODES[u].distanceTo(NODES[v]);if(nd<d[v])d[v]=nd;}}return d;}
 function setupCtf(){if(CTF)for(const m of CTF.meshes)if(m.parent)m.parent.remove(m);CTF=null;if(gameMode!=='ctf'||!NODES.length)return;
   const N=NODES.length,isPadN=i=>PADS.some(p=>onPad({pos:NODES[i]},p)),D=[];for(let i=0;i<N;i++)D.push(ctfDist(i));let ba=0,bb=1,bv=-1;

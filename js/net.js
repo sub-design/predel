@@ -184,12 +184,13 @@ function interpRemote(e,dt){const b=e.buf;if(!b||!b.length||NET.off==null){e.pos
   else if(b.length>=2){const c=b[1],k=(rt-a.t)/Math.max(.001,c.t-a.t);e.pos.lerpVectors(a.p,c.p,k);e.yaw=angLerp(a.y,c.y,k);e.pitch=a.pi+(c.pi-a.pi)*k;}
   else{e.pos.copy(a.p).addScaledVector(e.vel,Math.min(.15,rt-a.t));e.yaw=a.y;e.pitch=a.pi;}
   if(curMap===9&&e.up)e.up.copy(cubeUpAt(e.pos));}
-function clientUpdate(dt){time+=dt;if(state==='intro'){introT-=dt;if(introT<=0)finishIntro();return;}matchTime=Math.max(0,matchTime-dt);
+function clientUpdate(dt){time+=dt;updateAttractions(dt);if(state==='intro'){introT-=dt;if(introT<=0)finishIntro();return;}matchTime=Math.max(0,matchTime-dt);
   if(state==='play')updatePlayer(dt);else if(player.alive)applyMove(player,new V3(),dt,false);
   if(player.alive){player.cd-=dt;player.padCD-=dt;
-    for(const p of PADS)if(player.padCD<=0&&onPad(player,p)){player.vel.copy(p.vel);player.grounded=false;player.padCD=.6;playSnd('pad');}
+    if(!rideStep(player,dt)){
+    for(const p of PADS)if(player.padCD<=0&&onPad(player,p)){padLaunch(player,p);player.grounded=false;player.padCD=.6;playSnd('pad');}
     lavaCheck(player,dt,false,true);
-    const vy=player.vel.dot(entityUp(player)),wg=player.grounded;moveEntity(player,dt);voidCheck(player,false);if(!wg&&player.grounded&&vy<-14)playSnd('land');}
+    const vy=player.vel.dot(entityUp(player)),wg=player.grounded;moveEntity(player,dt);voidCheck(player,false);if(!wg&&player.grounded&&vy<-14)playSnd('land');}}
   for(const e of ents)if(e!==player&&e.alive&&e.tpos){interpRemote(e,dt);e.hurtT-=dt;}
   updatePickups(dt);
   for(let i=cprojs.length-1;i>=0;i--){const p=cprojs[i];p.life-=dt;p.pos.addScaledVector(p.vel,dt);p.mesh.position.copy(p.pos);

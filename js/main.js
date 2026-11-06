@@ -1,14 +1,15 @@
 // ПРЕДЕЛ — Main loop.
 'use strict';
 /* ---------- main loop ---------- */
-function update(dt){time+=dt;if(state==='intro'){introT-=dt;if(introT<=0)finishIntro();return;}
+function update(dt){time+=dt;updateAttractions(dt);if(state==='intro'){introT-=dt;if(introT<=0)finishIntro();return;}
   if(state==='play'||state==='paused'){matchTime-=dt;if(matchTime<=0){matchTime=0;endMatch();return;}if(state==='play')updatePlayer(dt);else if(player.alive)applyMove(player,new V3(),dt,false);}
   if(state==='play'){updateHill(dt);updateCtf(dt);}hillVisual();ctfVisual();
   for(const b of bots)if(ents.includes(b))updateBot(b,dt);
   for(const e of ents){if(!e.alive){if(e.remote&&!e.disc&&!e.out){e.deadT=(e.deadT||0)+dt;if(e.deadT>RESPAWN_AUTO+.3)spawnEntity(e);}continue;}
     updatePowerups(e,dt);if(e.remote){e.cd-=dt;e.hurtT-=dt;if(e.health>100)e.health=Math.max(100,e.health-dt*1.5);lavaCheck(e,dt,true,false);voidCheck(e,true);continue;}
     e.cd-=dt;e.padCD-=dt;e.hurtT-=dt;if(e.health>100)e.health=Math.max(100,e.health-dt*1.5);
-    for(const p of PADS)if(e.padCD<=0&&onPad(e,p)){e.vel.copy(p.vel);e.grounded=false;e.padCD=.6;e.padAir=true;playSnd('pad',e===player?null:e.pos);for(let i=0;i<10;i++)emit(e.pos,new V3((R()-.5)*3,6+R()*4,(R()-.5)*3),0x40d0ff,.1,.6,8);}
+    if(rideStep(e,dt))continue;
+    for(const p of PADS)if(e.padCD<=0&&onPad(e,p)){padLaunch(e,p);e.grounded=false;e.padCD=.6;e.padAir=true;playSnd('pad',e===player?null:e.pos);for(let i=0;i<10;i++)emit(e.pos,new V3((R()-.5)*3,6+R()*4,(R()-.5)*3),0x40d0ff,.1,.6,8);}
     lavaCheck(e,dt,true,true);
     if(!e.alive)continue;
     const vy=e.vel.dot(entityUp(e)),wg=e.grounded;moveEntity(e,dt);voidCheck(e,true);if(e===player&&!wg&&e.grounded&&vy<-14)playSnd('land');}

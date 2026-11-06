@@ -583,13 +583,17 @@ const MAPS=[
  {name:'ЛАБИРИНТ-КУБ',fog:0x111b28,near:4,far:78,sky:0x8da7b5,build:buildCubeLab,nav:navCubeLab,pickups(){
    addPickup('w2',5,20);addPickup('w2',8,20);addPickup('w3',11,25);addPickup('w3',14,25);addPickup('w4',17,22);addPickup('w4',18,22);addPickup('w5',6,25);addPickup('w5',9,25);addPickup('w6',12,28);
    addPickup('mega',15,55);addPickup('health',1,18);addPickup('health',2,18);addPickup('armor',3,28);addPickup('armor',4,28);addPickup('ammo',8,16);addPickup('ammo',14,16);
-   for(const [t,n,r] of [['double',17,45],['invis',12,40],['speed',1,35],['shield',5,45],['jet',3,48],['regen',15,38]])addPickup(t,n,r);}}];
+   for(const [t,n,r] of [['double',17,45],['invis',12,40],['speed',1,35],['shield',5,45],['jet',3,48],['regen',15,38]])addPickup(t,n,r);}},
+  {name:'ЛУНА-ПАРК',fog:0x1c1030,near:45,far:190,sky:0xffffff,build:buildLunaPark,nav:navLunaPark,pickups(){
+   for(const n of [1,3,6,8,9,16,31])addPickup('health',n,20);addPickup('mega',20,35);addPickup('armor',12,30);
+   addPickup('w2',0,20);addPickup('w3',23,20);addPickup('w4',19,20);addPickup('w5',26,25);addPickup('w6',10,25);for(const n of [2,4,25,34])addPickup('ammo',n,16);
+   for(const [t,n,r] of [['double',30,45],['invis',22,40],['speed',14,32],['shield',28,45],['jet',32,48],['regen',33,38]])addPickup(t,n,r);}}];
 let LV=null,decalGroup=null,curMap=-1,selMap=0,waterViewOn=false;const decals=[];
 function updateWaterView(){const w=curMap===4&&WATER_ZONES.find(z=>player.pos.x>z.x0&&player.pos.x<z.x1&&player.pos.z>z.z0&&player.pos.z<z.z1);const wet=!!(w&&state==='play'&&player.alive&&player.pos.y+1.6<w.surface);if(wet===waterViewOn)return;waterViewOn=wet;$('waterfx').style.opacity=wet?'.85':'0';if(curMap===4){scene.fog.color.setHex(wet?0x143c56:MAPS[curMap].fog);scene.background.setHex(wet?0x143c56:MAPS[curMap].fog);}if(sfxFilter&&AC)sfxFilter.frequency.setTargetAtTime(wet?850:22000,AC.currentTime,.12);}
 function loadMap(i){
   if(LV){scene.remove(LV);LV.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
   LV=new THREE.Group();scene.add(LV);decalGroup=new THREE.Group();LV.add(decalGroup);decals.length=0;if(typeof clearGibs==='function')clearGibs();resetMirrors();if(typeof clearCorpses==='function')clearCorpses();
-  solids.length=0;flames.length=0;padCones.length=0;PADS.length=0;PICKUPS.length=0;WATER_ZONES.length=0;BRIDGES.length=0;ICE_ZONES.length=0;lavaZones=[];
+  resetAttractions();solids.length=0;flames.length=0;padCones.length=0;PADS.length=0;PICKUPS.length=0;WATER_ZONES.length=0;BRIDGES.length=0;ICE_ZONES.length=0;lavaZones=[];
   for(const p of projs)scene.remove(p.mesh);projs.length=0;
   const m=MAPS[i];curMap=i;if(i!==9)camera.up.copy(UP);m.build();SPAWNS=m.nav().map(k=>NODES[k]);m.pickups();
   scene.fog.color.setHex(m.fog);scene.fog.near=m.near;scene.fog.far=m.far;scene.background.setHex(m.fog);skyMesh.material.color.setHex(m.sky);paintChrome(m.sky,m.fog);

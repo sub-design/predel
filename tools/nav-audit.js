@@ -1,7 +1,7 @@
 // Bot navigation audit. Open the game with ?navaudit in the URL, or paste into the console.
 // For every directed edge of every map's nav graph, a lone bot starts at node A with path [B]
 // and must reach B (same arrival rule as the bot code) within a time budget without dying.
-window.navAudit=function(maps=[0,1,2,3,4,5,6,7,8,9],opts={}){
+window.navAudit=function(maps=MAPS.map((_,i)=>i),opts={}){
   const dt=1/30,res={};const b=bots[0];const savedMode=gameMode,savedTrait=b.trait;const savedTemple=window.updateTempleFeatures;window.updateTempleFeatures=()=>{};// bridges collapse by design; test the geometry
   for(const m of maps){
     loadMap(m);gameMode='ffa';state='play';matchTime=1e9;player.alive=false;player.out=true;

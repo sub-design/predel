@@ -33,7 +33,7 @@ function updatePickups(dt){const noPk=modeWeapon()!=null;for(const p of PICKUPS)
     if(curMap===9?d<1.8:(dx*dx+dz*dz<1.7&&dy>-.6&&dy<2)){if(tryPickup(e,p)){p.active=false;p.t=p.respawn;p.mesh.visible=false;break;}}}}}
 
 /* ---------- movement / AI ---------- */
-function applyMove(e,wish,dt,jump){const up=entityUp(e),sp=(e.isBot?SKILL[difficulty].speed:11.5)*(e.speedT>0?1.5:1)*(inWater(e) ? .62 : 1);wish.addScaledVector(up,-wish.dot(up));const along=e.vel.dot(up),tangent=e.vel.clone().addScaledVector(up,-along);
+function applyMove(e,wish,dt,jump){if(e.ride)return;const up=entityUp(e),sp=(e.isBot?SKILL[difficulty].speed:11.5)*(e.speedT>0?1.5:1)*(inWater(e) ? .62 : 1);wish.addScaledVector(up,-wish.dot(up));const along=e.vel.dot(up),tangent=e.vel.clone().addScaledVector(up,-along);
   if(e.grounded){const k=Math.min(1,(onIce(e)?2.4:14)*dt);tangent.addScaledVector(wish.clone().multiplyScalar(sp).sub(tangent),k);e.vel.copy(tangent).addScaledVector(up,along);if(jump){e.vel.addScaledVector(up,curMap===9?15:JUMP);e.grounded=false;if(e===player)playSnd('jump');}}
   else{tangent.addScaledVector(wish,sp*2.2*dt);const h=tangent.length(),lim=Math.max(e.vel.clone().addScaledVector(up,-along).length(),sp);if(h>lim)tangent.multiplyScalar(lim/h);e.vel.copy(tangent).addScaledVector(up,along);}}
 function chooseWeapon(b,dist){const has=i=>b.owned[i]&&b.ammo[i]>0;let w=b.weapon;const T=TRAITS[b.trait],pw=T&&T.pick?T.pick(has,dist):-1;
@@ -50,6 +50,7 @@ function planPath(b){const s=nearestNode(b.pos);let goal=ctfGoal(b);const tr=b.t
   if(goal>=0){const path=bfs(s,goal);b.path=path?(path[0]===s?path:[s,...path]):[s,ADJ[s][(R()*ADJ[s].length)|0]];return;}
   if(HILL&&gameMode==='koth'&&!scared&&R()<(tr==='collector'?.6:.85))goal=HILL.node;
   else if(b.target&&!scared&&R()<(tr==='rush'?.85:tr==='sniper'?.15:.4))goal=nearestNode(b.target.pos);
+  else if(curMap===10&&!b.target&&!scared&&R()<.25)goal=[13,29,27,10][(R()*4)|0];// Luna Park: bots enjoy the rides too
   else if(R()<(tr==='collector'||scared?.97:.75)){let bv=0;for(const p of PICKUPS){if(!p.active||modeWeapon()!=null)continue;let v=0;const t=p.type;
     if(POWERUPS[t]&&b[POWERUPS[t].field]<=0)v=1.8;if(t==='health'&&b.health<60)v=3;if(t==='mega')v=b.health<120?2.5:.4;if(t==='armor')v=b.armor<50?2:.3;if(t==='w2'&&!b.owned[2])v=2.5;if(t==='w3'&&!b.owned[3])v=2.5;if(t==='w4'&&!b.owned[4])v=2.5;if(t==='w5'&&!b.owned[5])v=2.5;if(t==='w6'&&!b.owned[6])v=2.5;if(t==='ammo')v=.6;if(tr==='collector')v*=1.6;if(scared&&(t==='health'||t==='mega'))v*=3;
     v=v/(1+NODES[p.node].distanceTo(b.pos)/30)*(.6+R()*.8);if(v>bv){bv=v;goal=p.node;}}}
@@ -83,7 +84,7 @@ function updateBot(b,dt){
   if((curMap===2||curMap===5||curMap===8)&&b.grounded&&wish.lengthSq()>.01){const noFloor=d=>{const pr=b.pos.clone().addScaledVector(d,1.3);pr.y+=.6;return rayLevel(a3(pr),[0,-1,0],4)>=3.9;};
     if(noFloor(wish.clone().normalize())){wish.copy(pathWish);jump=false;if(wish.lengthSq()>.01&&noFloor(wish.clone().normalize())&&b.path&&b.path.length&&NODES[b.path[0]].y>=b.pos.y-.5)wish.set(0,0,0);}}
   // Cube pads fire bots through narrow portals: stay ballistic while rising, steering would drag them into the frame.
-  if(b.padAir&&curMap===9){if(b.grounded&&b.padCD<=0)b.padAir=false;else{jump=false;if(b.vel.dot(entityUp(b))>0)wish.set(0,0,0);}}
+  if(b.padAir&&(curMap===9||curMap===10)){if(b.grounded&&b.padCD<=0)b.padAir=false;else{jump=false;if(b.vel.dot(entityUp(b))>0)wish.set(0,0,0);}}
   applyMove(b,wish,dt,jump);if(b.jetT>0&&b.target&&b.target.pos.clone().sub(b.pos).dot(entityUp(b))>.8){b.vel.addScaledVector(entityUp(b),22*dt);b.grounded=false;}
   b.stuckT+=dt;if(b.stuckT>1.2){if(b.pos.distanceTo(b.stuckPos)<1){b.path=null;if(b.grounded)b.vel.addScaledVector(entityUp(b),JUMP);}b.stuckT=0;b.stuckPos.copy(b.pos);}
   let dYaw=b.yaw,dPitch=0;

@@ -46,7 +46,7 @@ button.link{background:none;border:none;box-shadow:none;color:#a080c0;font-size:
 .hint{font-size:9px;line-height:1.9;color:#9a9aaa;text-transform:none;max-width:520px;margin:8px auto}
 .setupwrap{display:flex;gap:28px;align-items:flex-start;justify-content:center;max-width:96vw}
 .setupmain{max-width:720px}.setupmain.ro #mode,.setupmain.ro #maps,.setupmain.ro #botn,.setupmain.ro #diffrow{pointer-events:none}
-.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:12px}
 .cards button{padding:5px 5px 8px;font-size:9px;display:flex;flex-direction:column;gap:6px;align-items:center;min-height:62px;justify-content:flex-start}.cards img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;image-rendering:pixelated;border:2px solid #000;background:#0c0814;filter:saturate(.75) brightness(.8)}.cards button.on img,.cards button:hover img{filter:none}
 .cards button span{font-size:8px;line-height:1.6;color:#8a8a9a;text-transform:none}.cards button.on span{color:#d8c070}
 #mode button{font-size:10px;padding:10px 12px;white-space:nowrap}#mode.row{flex-wrap:wrap}
@@ -202,24 +202,25 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="js/core.js?v=202611060904"></script>
-<script src="js/maps.js?v=202611060904"></script>
-<script src="js/physics.js?v=202611060904"></script>
-<script src="js/fx.js?v=202611060904"></script>
-<script src="js/reflect.js?v=202611060904"></script>
-<script src="js/acoustics.js?v=202611060904"></script>
-<script src="js/audio.js?v=202611060904"></script>
-<script src="js/anim.js?v=202611060904"></script>
-<script src="js/portraits.js?v=202611060904"></script>
-<script src="js/entities.js?v=202611060904"></script>
-<script src="js/net.js?v=202611060904"></script>
-<script src="js/modes.js?v=202611060904"></script>
-<script src="js/combat.js?v=202611060904"></script>
-<script src="js/ai.js?v=202611060904"></script>
-<script src="js/player.js?v=202611060904"></script>
-<script src="js/hud.js?v=202611060904"></script>
-<script src="js/game.js?v=202611060904"></script>
-<script src="js/main.js?v=202611060904"></script>
-<script>for(const [k,f] of [['navaudit','nav-audit'],['smoke','smoke']])if(new RegExp('[?&]'+k).test(location.search)){const s=document.createElement('script');s.src='tools/'+f+'.js';document.body.append(s);}</script>
+<script src="js/core.js?v=202611061319"></script>
+<script src="js/park.js?v=202611061319"></script>
+<script src="js/maps.js?v=202611061319"></script>
+<script src="js/physics.js?v=202611061319"></script>
+<script src="js/fx.js?v=202611061319"></script>
+<script src="js/reflect.js?v=202611061319"></script>
+<script src="js/acoustics.js?v=202611061319"></script>
+<script src="js/audio.js?v=202611061319"></script>
+<script src="js/anim.js?v=202611061319"></script>
+<script src="js/portraits.js?v=202611061319"></script>
+<script src="js/entities.js?v=202611061319"></script>
+<script src="js/net.js?v=202611061319"></script>
+<script src="js/modes.js?v=202611061319"></script>
+<script src="js/combat.js?v=202611061319"></script>
+<script src="js/ai.js?v=202611061319"></script>
+<script src="js/player.js?v=202611061319"></script>
+<script src="js/hud.js?v=202611061319"></script>
+<script src="js/game.js?v=202611061319"></script>
+<script src="js/main.js?v=202611061319"></script>
+<script>for(const [k,f] of [['navaudit','nav-audit'],['smoke','smoke']])if(new RegExp('[?&]'+k).test(location.search)){const s=document.createElement('script');s.src='tools/'+f+'.js?'+Date.now();document.body.append(s);}</script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 // Runs in the page itself, no build or test framework: about half a minute on a laptop.
 // Checks: nav audit, every mode on every map with bots, finite positions, end screen + stats, music themes.
 window.runSmoke=async function(opts={}){
-  const secs=opts.secs||20,maps=opts.maps||[0,1,2,3,4,5,6,7,8,9],modes=opts.modes||['ffa','team','insta','rocket','koth','lms','duel','ctf'];
+  const secs=opts.secs||20,maps=opts.maps||MAPS.map((_,i)=>i),modes=opts.modes||['ffa','team','insta','rocket','koth','lms','duel','ctf'];
   const fails=[],notes=[],t0=performance.now();const fail=(what,why)=>fails.push(`${what}: ${why}`);
   // Seeded randomness so a run is reproducible (R in the game is Math.random).
   const realRandom=Math.random;let sd=opts.seed||12345;Math.random=()=>(sd=(sd*16807)%2147483647)/2147483647;
@@ -32,7 +32,7 @@ window.runSmoke=async function(opts={}){
     player.out=false;state='menu';$('end').classList.add('hidden');}
   botCount=savedBots;selectedMode=savedMode;selMap=savedMap;notes.push(`matches: ${matches}`);
   // 3. music themes render without errors
-  try{initAudio();const realAC=AC,realBus=musicBus;for(let m=0;m<MUSIC_STYLES.length;m++){const S=MUSIC_STYLES[m],L=S&&S.len||16,sd=60/(S?S.bpm:148)/(L===12?3:4);
+  try{initAudio();const realAC=AC,realBus=musicBus;for(let m=0;m<MUSIC_STYLES.length;m++){const S=MUSIC_STYLES[m],L=S&&S.len||16,sd=60/(S?S.bpm:148)/((S&&S.div)||(L===12?3:4));
       const oc=new OfflineAudioContext(1,Math.ceil(22050*(L*sd*2+.5)),22050);AC=oc;musicBus=oc.createGain();musicBus.connect(oc.destination);
       for(let k=0;k<L*2;k++){if(S)scheduleStyleStep(S,3*16*L+k,.02+k*sd,sd);else scheduleBattleStep(3*16*L+k,.02+k*sd);}
       AC=realAC;musicBus=realBus;// restore before awaiting: the live music timer must never see the offline context

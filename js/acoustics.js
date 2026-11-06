@@ -33,7 +33,8 @@ const MAP_ACOUSTICS=[
   {env:'snow',zones:[['cave',-33,0,-7,-15,6,7]]},
   {env:'hall',zones:[['metal',-9,0,-9,9,7,9],['duct',-25,0,-3.5,-10,2.6,3.5],['duct',10,0,-3.5,25,2.6,3.5],['duct',-3.5,0,-25,3.5,2.6,-10],['duct',-3.5,0,10,3.5,2.6,25]]},
   {env:'open',zones:[['hold',-28,-4,-17,28,3,17]]},
-  {env:'chamber'}];
+  {env:'chamber'},
+  {env:'open',zones:[['small',-42,0,-16,-24,6,4]]}];
 let revIn=null,revA=null,revB=null,revGA=null,revGB=null,revActiveA=true,curEnv='',envCheckT=0;const IR_CACHE={};
 function makeIR(p){const sr=AC.sampleRate,pre=Math.floor(p.pre*sr),len=Math.max(pre+64,Math.floor(sr*(p.t+p.pre))),buf=AC.createBuffer(2,len,sr);
   for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);let lp=0;

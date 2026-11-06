@@ -10,7 +10,7 @@ function moveAxis(e,a,d,wasG){if(d===0)return;const k=AX[a],up=entityUp(e);e.pos
   const to=d>0?b.min[a]-e.r-.001:b.max[a]+e.r+.001;
   // Never resolve to the far side of a box: if the push is longer than the step, just undo the step.
   e.pos[k]=Math.abs(to-(e.pos[k]-d))>Math.abs(d)+.01?e.pos[k]-d:to;e.vel[k]=0;}
-function moveEntity(e,dt){const up=entityUp(e),gravity=curMap===9?15:(curMap>=0?(MAPS[curMap].gravity||G):G),terminal=curMap===9?42:50;e.vel.addScaledVector(up,-gravity*dt);const downSpeed=e.vel.dot(up);if(downSpeed< -terminal)e.vel.addScaledVector(up,-terminal-downSpeed);const wasG=e.grounded;e.grounded=false;
+function moveEntity(e,dt){if(e.ride)return;const up=entityUp(e),gravity=curMap===9?15:(curMap>=0?(MAPS[curMap].gravity||G):G),terminal=curMap===9?42:50;e.vel.addScaledVector(up,-gravity*dt);const downSpeed=e.vel.dot(up);if(downSpeed< -terminal)e.vel.addScaledVector(up,-terminal-downSpeed);const wasG=e.grounded;e.grounded=false;
   const mx=Math.max(Math.abs(e.vel.x),Math.abs(e.vel.y),Math.abs(e.vel.z))*dt,n=Math.max(1,Math.ceil(mx/.25)),s=dt/n;
   for(let i=0;i<n;i++){moveAxis(e,0,e.vel.x*s,wasG);moveAxis(e,2,e.vel.z*s,wasG);moveAxis(e,1,e.vel.y*s,wasG);}}
 function rayBox(o,d,mn,mx,maxT){let t0=0,t1=maxT;for(let a=0;a<3;a++){if(Math.abs(d[a])<1e-8){if(o[a]<mn[a]||o[a]>mx[a])return -1;continue;}const inv=1/d[a];let ta=(mn[a]-o[a])*inv,tb=(mx[a]-o[a])*inv;if(ta>tb){const t=ta;ta=tb;tb=t;}if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return -1;}return t0;}

@@ -40,8 +40,8 @@ $('tomenu').addEventListener('click',()=>{if(isClient()){leaveGame();return;}if(
 document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',()=>{if(isClient())return;difficulty=+b.dataset.d;broadcastLobbySoon();document.querySelectorAll('#diff button').forEach(x=>x.classList.toggle('on',x===b));}));
 
 /* ---------- screens and lobby ---------- */
-const MAP_SHORT=['БАСТИОН','ЛИТЕЙНЯ','ОРБИТА','ПОЛИГОН','ХРАМ','КРЫШИ','ЛЕДНИК','РЕАКТОР','КОРАБЛЬ','КУБ'];
-const MAP_DESC=['крепость, джамп-пады','лава и узкие мостки','низкая гравитация, бездна','маленькая, для дуэли','руины, река, мосты рушатся','ночной город, пропасть','скользкий лёд, метель','ядро пульсирует, свет гаснет','шторм, волны за борт','гравитация в каждой комнате своя'];
+const MAP_SHORT=['БАСТИОН','ЛИТЕЙНЯ','ОРБИТА','ПОЛИГОН','ХРАМ','КРЫШИ','ЛЕДНИК','РЕАКТОР','КОРАБЛЬ','КУБ','ЛУНА-ПАРК'];
+const MAP_DESC=['крепость, джамп-пады','лава и узкие мостки','низкая гравитация, бездна','маленькая, для дуэли','руины, река, мосты рушатся','ночной город, пропасть','скользкий лёд, метель','ядро пульсирует, свет гаснет','шторм, волны за борт','гравитация в каждой комнате своя','колесо, горки, пушка'];
 const SCREENS=['menu','setup','joinscr'];let setupMode='solo';
 function hideScreens(){for(const id of SCREENS)$(id).classList.add('hidden');}
 function showScreen(id){hideScreens();$(id).classList.remove('hidden');}

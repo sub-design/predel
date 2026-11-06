@@ -150,7 +150,15 @@ const MUSIC_STYLES=[null,
   arp:[0,2,4,6,8,10,12,10,8,6,4,2,0,6,12,18],arpInst:'bell',arpOct:12,arpVol:.035,arpDur:.12,echo:1,
   pad:[0,6,10],padWave:'sine',padVol:.02,padCut:2000,padBars:2,
   lead:[12,null,null,18,null,null,16,null,14,null,null,null,10,null,null,null,12,null,null,14,null,null,16,null,18,null,20,null,22,null,null,null],leadInst:'square',leadVol:.03,leadCut:2400,leadDur:.16,
-  sec:['kshba','kshbal','khbap','kshbal']}];
+  sec:['kshba','kshbal','khbap','kshbal']},
+ // 10 Луна-парк — жутковатый карнавальный вальс на 3/4: «умпа-па», каллиопа
+ {bpm:138,len:12,div:4,prog:[45,41,40,45],kick:'x...........',kick2:'x.......x...',snare:'....c...c...',snareVol:.17,hat:'..x...x...x.',hatVol:.04,
+  bass:[0,null,null,null,null,null,null,null,null,null,7,null],bassInst:'saw',bassDur:.3,bassVol:.12,bassCut:600,
+  riff:[null,null,null,null,19,null,null,null,19,null,null,null],riffInst:'square',riffOct:0,riffVol:.03,riffDur:.18,riffCut:2200,
+  arp:[null,null,null,null,15,null,null,null,15,null,null,null],arpInst:'square',arpOct:0,arpVol:.026,arpDur:.18,arpCut:2200,
+  lead:[24,null,null,null,23,null,24,null,27,null,null,null,26,null,null,null,24,null,23,null,21,null,null,null],leadInst:'flute',leadOct:0,leadVol:.05,leadDur:.28,leadCut:3200,
+  pad:[0,7,12],padWave:'triangle',padVol:.012,padCut:900,padBars:2,
+  sec:['kshbr','kshbral','kshbrap','kshbral']}];
 function scheduleStyleStep(S,step,t,sd){if(muted)return;const L=S.len||16,bar=Math.floor(step/L),i=step%L,sec=Math.floor(bar/16)%4,on=S.sec[sec],root=S.prog[Math.floor(bar/4)%S.prog.length];
   if(on.includes('k')&&(sec===2&&S.kick2?S.kick2:S.kick)[i]==='x')musicKick(t);
   if(on.includes('s')&&S.snare[i]!=='.')musicDrum(S.snare[i],t,S);
@@ -161,7 +169,7 @@ function scheduleStyleStep(S,step,t,sd){if(muted)return;const L=S.len||16,bar=Ma
   if(on.includes('l')&&S.lead){const n=S.lead[(bar%(S.lead.length/L))*L+i];if(n!=null)musicInst(S.leadInst,musicMidi(root+(S.leadOct??12)+n),t,S.leadDur||.12,S.leadVol||.04,S.leadCut||3000);}
   if(on.includes('p')&&S.pad&&i===0&&bar%(S.padBars||2)===0){const d=sd*L*(S.padBars||2)*.98;for(const iv of S.pad)musicTone(musicMidi(root+12+iv),t,d,S.padWave||'sawtooth',S.padVol||.015,S.padCut||900,Math.min(.4,d*.3));}
   if(S.fx)musicFx(S,bar,i,t,sd,root);}
-function scheduleMusic(){if(!musicOn||!AC)return;const S=musicMode==='battle'?MUSIC_STYLES[musicStyle]:null,L=S&&S.len||16,horizon=AC.currentTime+.12,bpm=S?S.bpm:musicMode==='battle'?148:MUSIC_BPM,stepDur=60/bpm/(L===12?3:4);
+function scheduleMusic(){if(!musicOn||!AC)return;const S=musicMode==='battle'?MUSIC_STYLES[musicStyle]:null,L=S&&S.len||16,horizon=AC.currentTime+.12,bpm=S?S.bpm:musicMode==='battle'?148:MUSIC_BPM,stepDur=60/bpm/((S&&S.div)||(L===12?3:4));
   while(nextMusicTime<horizon){if(S)scheduleStyleStep(S,musicStep,nextMusicTime,stepDur);else if(musicMode==='battle')scheduleBattleStep(musicStep,nextMusicTime);else scheduleMusicStep(musicStep,nextMusicTime);musicStep=(musicStep+1)%(MUSIC_BARS*L);nextMusicTime+=stepDur;}}
 function startMusic(mode='battle'){if(!AC)initAudio();if(!AC)return;const st=mode==='battle'?curMap:-1;if(musicOn&&musicMode===mode&&musicStyle===st)return;if(musicTimer)clearInterval(musicTimer);musicOn=true;musicMode=mode;musicStyle=st;musicStep=0;nextMusicTime=AC.currentTime+.08;if(AC.state==='suspended')AC.resume().catch(()=>{});if(musicBus){musicBus.gain.cancelScheduledValues(AC.currentTime);musicBus.gain.setValueAtTime(musicBus.gain.value,AC.currentTime);musicBus.gain.setTargetAtTime(0,AC.currentTime,.02);musicBus.gain.setTargetAtTime((muted||!SET.music)?0:MUSIC_VOL,AC.currentTime+.08,.035);}musicTimer=setInterval(scheduleMusic,25);}
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}musicOn=false;}
