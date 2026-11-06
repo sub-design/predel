@@ -28,6 +28,12 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;image-rendering:crisp-edg
 #rank{color:#aaa;font-size:11px}
 #feed{position:absolute;right:24px;top:96px;font-size:10px;text-align:right;line-height:2}
 #feed .w{color:#888}
+i.pf{display:inline-block;width:16px;height:16px;vertical-align:-4px;margin-right:5px;background:#10141c center/cover no-repeat;image-rendering:pixelated;box-shadow:0 0 0 1px #000}
+.board i.pf,#score i.pf,#sb i.pf{width:20px;height:20px;vertical-align:-6px}
+#talker{position:absolute;left:24px;top:96px;text-align:center;opacity:0;transform:translateX(-12px);transition:opacity .15s,transform .15s}
+#talker.on{opacity:1;transform:none}
+#talker img{display:block;width:72px;height:72px;image-rendering:pixelated;border:2px solid #000;box-shadow:3px 3px 0 #000;background:#10141c}
+#talkname{font-size:9px;margin-top:5px;max-width:96px;overflow:hidden}
 #feed .chat{color:#e8f0ff;text-transform:none}
 #chatin{position:fixed;left:24px;bottom:96px;width:440px;max-width:calc(100vw - 48px);font:inherit;font-size:11px;padding:8px 10px;background:rgba(10,4,20,.9);color:#fff;border:2px solid #6a3a8a;outline:none;text-transform:none;z-index:6}
 #settings .row{flex-wrap:wrap;gap:14px;align-items:center}#settings label{display:flex;align-items:center;gap:6px;font-size:10px;color:#ccc}#settings input[type=range]{width:110px;accent-color:#ffd040}#settings span{min-width:34px;text-align:left;color:#ffd040}
@@ -108,6 +114,7 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
   <svg id="cross" viewBox="0 0 24 24" shape-rendering="crispEdges"><g><rect x="11" y="2" width="2" height="6"/><rect x="11" y="16" width="2" height="6"/><rect x="2" y="11" width="6" height="2"/><rect x="16" y="11" width="6" height="2"/></g><rect x="11" y="11" width="2" height="2" fill="#ff3030"/></svg>
   <div id="target"></div>
   <div id="tl"><span id="timer">10:00</span><div id="netinfo"></div></div>
+  <div id="talker"><img id="talkimg" alt=""><div id="talkname"></div></div>
   <div id="tr"><div id="frags">ФРАГИ 0</div><div id="rank"></div></div>
   <div id="feed"></div><input id="chatin" class="hidden" maxlength="100" autocomplete="off" placeholder="СООБЩЕНИЕ · ENTER — ОТПРАВИТЬ · ESC — ОТМЕНА">
   <div id="announce"><div id="annbig"></div><div id="annsub"></div></div><div id="dmgdir"></div><div id="chatlog"></div>
@@ -195,22 +202,23 @@ body.retro #retrofx{opacity:.38;animation:crt .13s steps(2) infinite}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="js/core.js?v=202611060146"></script>
-<script src="js/maps.js?v=202611060146"></script>
-<script src="js/physics.js?v=202611060146"></script>
-<script src="js/fx.js?v=202611060146"></script>
-<script src="js/reflect.js?v=202611060146"></script>
-<script src="js/audio.js?v=202611060146"></script>
-<script src="js/anim.js?v=202611060146"></script>
-<script src="js/entities.js?v=202611060146"></script>
-<script src="js/net.js?v=202611060146"></script>
-<script src="js/modes.js?v=202611060146"></script>
-<script src="js/combat.js?v=202611060146"></script>
-<script src="js/ai.js?v=202611060146"></script>
-<script src="js/player.js?v=202611060146"></script>
-<script src="js/hud.js?v=202611060146"></script>
-<script src="js/game.js?v=202611060146"></script>
-<script src="js/main.js?v=202611060146"></script>
+<script src="js/core.js?v=202611060156"></script>
+<script src="js/maps.js?v=202611060156"></script>
+<script src="js/physics.js?v=202611060156"></script>
+<script src="js/fx.js?v=202611060156"></script>
+<script src="js/reflect.js?v=202611060156"></script>
+<script src="js/audio.js?v=202611060156"></script>
+<script src="js/anim.js?v=202611060156"></script>
+<script src="js/portraits.js?v=202611060156"></script>
+<script src="js/entities.js?v=202611060156"></script>
+<script src="js/net.js?v=202611060156"></script>
+<script src="js/modes.js?v=202611060156"></script>
+<script src="js/combat.js?v=202611060156"></script>
+<script src="js/ai.js?v=202611060156"></script>
+<script src="js/player.js?v=202611060156"></script>
+<script src="js/hud.js?v=202611060156"></script>
+<script src="js/game.js?v=202611060156"></script>
+<script src="js/main.js?v=202611060156"></script>
 <script>for(const [k,f] of [['navaudit','nav-audit'],['smoke','smoke']])if(new RegExp('[?&]'+k).test(location.search)){const s=document.createElement('script');s.src='tools/'+f+'.js';document.body.append(s);}</script>
 </body>
 </html>

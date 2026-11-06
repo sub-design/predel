@@ -6,7 +6,7 @@ function spawnEntity(e){clearPowerups(e);let best=SPAWNS[0],bd=-1;for(let k=0;k<
   if(curMap!==9)e.yaw=Math.atan2(e.pos.x,e.pos.z);e.pitch=0;e.streak=0;e.multi=0;e.sseq++;e.deadT=0;if(e.mesh)e.mesh.group.visible=true;nev({t:'sp',e:e.nid,p:a3r(e.pos)});
   if(e.isBot){e.path=null;e.target=null;e.mesh.group.visible=true;const T=TRAITS[e.trait];if(T&&R()<.7){const w=T.fav[(R()*T.fav.length)|0];e.owned[w]=1;e.ammo[w]=WEAPONS[w].pick;}else if(R()<.55){const w=[2,3,4,5,6][(R()*5)|0];e.owned[w]=1;e.ammo[w]=WEAPONS[w].pick;}}
   {const mw=modeWeapon();if(mw!=null){e.owned=Array(WEAPONS.length).fill(0);e.owned[mw]=1;e.ammo=Array(WEAPONS.length).fill(0);e.ammo[mw]=99;e.weapon=mw;}}
-  const up=entityUp(e),c=e.pos.clone().addScaledVector(up,1);for(let i=0;i<20;i++)emit(c.clone().add(rv(1.2)),up.clone().multiplyScalar(2+R()*3),0x80e0ff,.1,.8);
+  const up=entityUp(e),c=e.pos.clone().addScaledVector(up,1);if(e!==player)for(let i=0;i<20;i++)emit(c.clone().add(rv(1.2)),up.clone().multiplyScalar(2+R()*3),0x80e0ff,.1,.8);// your own sparkle would fill the screen
   playSnd('respawn',e===player?null:e.pos);
   if(e===player){$('center').innerHTML='';showWeaponName();if(e.deaths>0)speakBattleLine(RESPAWN_LINES);}}
 
@@ -65,7 +65,7 @@ function damage(t,amt,att,w,head){if(!att&&w&&w.lava&&t.lastAtt&&t.lastAtt!==t&&
 let firstBlood=false;
 const MULTI=['','','ДВОЙНОЕ УБИЙСТВО','ТРОЙНОЕ УБИЙСТВО','МЕГА-УБИЙСТВО','ЧУДОВИЩНО!'];
 const STREAK={5:'СЕРИЯ УБИЙСТВ!',10:'НЕУДЕРЖИМ!',15:'БОГОПОДОБЕН!'};
-const nm=e=>`<span style="color:${hex(teamColorFor(e))}">${e.name}</span>`;
+const nm=e=>`${pf(e)}<span style="color:${hex(teamColorFor(e))}">${e.name}</span>`;
 function kill(t,att,w,head){t.lastAtt=null;addBloodStain(t.pos);clearPowerups(t);t.alive=false;t.deaths++;t.streak=0;t.deadT=0;const over=t.health<=-35||!!(w&&w.lava)||!!(w&&w.splash&&t.health<=-15),dk=(R()*4)|0;deathFX(t,over,dk);playSnd('death',t===player?null:t.pos);if(t===player)speakBattleLine(DEATH_LINES);nev({t:'gib',e:t.nid,o:over?1:0,k:dk});
   if(gameMode==='ctf')ctfDrop(t,!!(w&&w.lava)||t.pos.y<-40);
   if(t.st&&(!att||att===t))t.st.self++;
